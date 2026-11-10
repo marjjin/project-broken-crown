@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_data.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+id = &"royal_guard_sword"
+display_name = "Espada de la Guardia Real"
+light_damage = 12.0
+heavy_damage = 30.0
+heavy_stamina_cost = 30.0
+light_combo_multipliers = PackedFloat32Array(1, 1, 1.5)
+reach = 1.6
+hit_width = 1.4
+hit_height = 1.4
+light_duration = 0.45
+light_hit_start = 0.14
+light_hit_end = 0.3
+heavy_duration = 0.9
+heavy_hit_start = 0.5
+heavy_hit_end = 0.68
+combo_input_open = 0.15
+recovery_time = 0.35

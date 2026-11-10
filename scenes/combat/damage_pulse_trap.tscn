@@ -1,0 +1,55 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/level/damage_pulse_trap.gd" id="1_trap"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="2_hitbox"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_pad"]
+size = Vector3(3, 0.06, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_zone"]
+size = Vector3(3, 1.2, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_post"]
+size = Vector3(0.15, 1.2, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_post"]
+albedo_color = Color(0.2, 0.18, 0.18, 1)
+
+[node name="DamagePulseTrap" type="Node3D" node_paths=PackedStringArray("hitbox", "pad_mesh")]
+script = ExtResource("1_trap")
+hitbox = NodePath("Hitbox")
+pad_mesh = NodePath("Pad")
+
+[node name="Pad" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.03, 0)
+mesh = SubResource("BoxMesh_pad")
+
+[node name="Hitbox" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 4
+monitorable = false
+script = ExtResource("2_hitbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
+position = Vector3(0, 0.6, 0)
+shape = SubResource("BoxShape3D_zone")
+
+[node name="PostA" type="MeshInstance3D" parent="."]
+position = Vector3(-1.5, 0.6, -1.5)
+mesh = SubResource("BoxMesh_post")
+surface_material_override/0 = SubResource("StandardMaterial3D_post")
+
+[node name="PostB" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 0.6, -1.5)
+mesh = SubResource("BoxMesh_post")
+surface_material_override/0 = SubResource("StandardMaterial3D_post")
+
+[node name="PostC" type="MeshInstance3D" parent="."]
+position = Vector3(-1.5, 0.6, 1.5)
+mesh = SubResource("BoxMesh_post")
+surface_material_override/0 = SubResource("StandardMaterial3D_post")
+
+[node name="PostD" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 0.6, 1.5)
+mesh = SubResource("BoxMesh_post")
+surface_material_override/0 = SubResource("StandardMaterial3D_post")

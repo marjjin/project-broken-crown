@@ -17,3 +17,7 @@ const LOOK_DOWN: StringName = &"look_down"
 const SPRINT: StringName = &"sprint"
 const JUMP: StringName = &"jump"
 const RELEASE_MOUSE: StringName = &"release_mouse"
+
+const ATTACK_LIGHT: StringName = &"attack_light"
+const ATTACK_HEAVY: StringName = &"attack_heavy"
+const DODGE: StringName = &"dodge"

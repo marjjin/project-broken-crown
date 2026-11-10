@@ -5,6 +5,9 @@
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3_player"]
 [ext_resource type="Script" path="res://scripts/core/mouse_capture_controller.gd" id="4_mouse"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://scenes/combat/training_dummy.tscn" id="6_dummy"]
+[ext_resource type="PackedScene" path="res://scenes/combat/damage_pulse_trap.tscn" id="7_trap"]
+[ext_resource type="PackedScene" path="res://scenes/ui/combat_hud.tscn" id="8_combat_hud"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.16, 0.18, 0.24, 1)
@@ -162,6 +165,21 @@ rotation = Vector3(0, 0.523599, 0)
 size = Vector3(8, 1.5, 0.5)
 color = Color(0.35, 0.33, 0.32, 1)
 
+[node name="CombatArea" type="Node3D" parent="Level"]
+
+[node name="DummyFront" parent="Level/CombatArea" instance=ExtResource("6_dummy")]
+position = Vector3(0, 0, 2.5)
+
+[node name="DummyLeft" parent="Level/CombatArea" instance=ExtResource("6_dummy")]
+position = Vector3(-3, 0, 1.5)
+
+[node name="DummyFar" parent="Level/CombatArea" instance=ExtResource("6_dummy")]
+position = Vector3(-5, 0, 4)
+respawn_delay = 0.0
+
+[node name="DamagePulseTrap" parent="Level/CombatArea" instance=ExtResource("7_trap")]
+position = Vector3(6, 0, 8)
+
 [node name="Player" parent="." instance=ExtResource("3_player")]
 position = Vector3(0, 0.2, 6)
 
@@ -170,3 +188,8 @@ script = ExtResource("4_mouse")
 
 [node name="HUD" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_hud")]
 player = NodePath("../Player")
+
+[node name="CombatHUD" parent="." node_paths=PackedStringArray("health", "stamina", "actions") instance=ExtResource("8_combat_hud")]
+health = NodePath("../Player/HealthComponent")
+stamina = NodePath("../Player/StaminaComponent")
+actions = NodePath("../Player/ActionController")

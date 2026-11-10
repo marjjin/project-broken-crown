@@ -2,7 +2,11 @@
 
 RPG de acción 3D en tercera persona, ambientado en un mundo medieval de fantasía oscura.
 
-**Fase actual: 1 — Prototipo de movimiento y cámara.** Todavía no hay combate, enemigos, inventario ni persistencia.
+**Plataforma objetivo: escritorio (Windows; Steam a futuro).** La versión web quedó descartada.
+
+**Fase actual: 2 — Sistema de combate.** Incluye espada, combo de tres golpes, ataque fuerte, esquiva con invulnerabilidad, vida y stamina, y maniquíes de entrenamiento. Todavía no hay enemigos con IA, inventario ni persistencia.
+
+Documentación técnica del combate: [docs/COMBAT.md](docs/COMBAT.md).
 
 ---
 
@@ -12,9 +16,8 @@ RPG de acción 3D en tercera persona, ambientado en un mundo medieval de fantas�
 |---|---|
 | Motor | **Godot 4.7.2 stable**, edición estándar (GDScript, *no* la edición .NET/C#) |
 | Versión mínima esperada | Godot 4.4 (el código usa API estable desde 4.3; no se probó en versiones anteriores) |
-| Plantillas de exportación | Solo para exportar a web: *Editor → Manage Export Templates → Download and Install* |
+| Plantillas de exportación | Solo para generar el `.exe`: plantilla **Windows x86_64** |
 | Plugins externos | Ninguno |
-| Servidor local (prueba web) | Cualquier servidor HTTP estático, por ejemplo Python 3 (`python -m http.server`) |
 
 Descarga oficial de Godot: <https://godotengine.org/download>
 
@@ -39,6 +42,9 @@ godot --path . -e # abre el editor
 | Cámara | Mouse (con el cursor capturado) | Stick derecho |
 | Correr | Shift (mantener) | L3 (clic del stick izquierdo) |
 | Saltar | Espacio | A / Cruz |
+| Ataque ligero (combo de 3) | Clic izquierdo | RB / R1 |
+| Ataque fuerte (30 stamina) | Clic derecho | RT / R2 |
+| Esquiva (20 stamina) | Ctrl | B / Círculo |
 | Liberar el mouse | Esc | — |
 | Capturar el mouse | Clic izquierdo | — |
 
@@ -46,18 +52,38 @@ Las teclas usan *physical keycodes*: WASD queda en la misma posición física co
 
 El salto se desactiva sin tocar código: abrí `resources/player/default_movement_settings.tres` y desmarcá **Jump Enabled**.
 
+- **Combo:** volvé a hacer clic durante el golpe para encadenar; el tercero hace más daño.
+- **Esquiva:** con dirección, ruedas hacia ella; sin dirección, das un paso atrás.
+- **Clic para capturar:** el clic que captura el mouse no dispara un ataque.
+
+### En el nivel
+
+- **Maniquíes:** frente al punto de inicio. Muestran su vida y reaparecen a los 4 s, salvo el más lejano, que queda caído.
+- **Trampa de prueba** (al sudeste, placa roja con postes): se ilumina en naranja y después daña 15 puntos cada 2,5 s. Sirve para probar la invulnerabilidad: esquivá justo cuando se pone roja.
+- **Muerte:** si tu vida llega a 0, reaparecés a los 3 s.
+
+Los ajustes del combate están en `resources/weapons/royal_guard_sword.tres` y `resources/player/default_action_settings.tres`. Ver [docs/COMBAT.md](docs/COMBAT.md).
+
 ## Estructura
 
 ```
 project.godot                 Configuración (renderizador Compatibility, capas físicas, autoload)
-export_presets.cfg            Preset de exportación Web (sin threads)
+export_presets.cfg            Preset de exportación Windows Desktop (más un preset Web sin uso)
 scenes/
   main/main.tscn              Nivel de prueba: suelo, luz, paredes, rampa, escalones, pilares, túnel
   player/player.tscn          Personaje (CharacterBody3D + cápsula + CameraRig instanciado)
   camera/camera_rig.tscn      Rig de cámara: Yaw → PitchPivot → SpringArm3D → Camera3D
   level/box_obstacle.tscn     Caja estática reutilizable
+  combat/training_dummy.tscn  Maniquí de entrenamiento
+  combat/damage_pulse_trap.tscn  Trampa de prueba (daño periódico)
   ui/hud.tscn                 HUD mínimo (controles + estado)
+  ui/combat_hud.tscn          Barras de vida/stamina y estado de acción
 scripts/
+  combat/                     Vida, stamina, hitbox, hurtbox, DamageInfo, WeaponData, PlayerActionSettings
+  animation/                  Interfaz ActionAnimator + animaciones provisionales con Tweens
+  player/player_action_controller.gd  Máquina de estados de combate
+  level/training_dummy.gd, level/damage_pulse_trap.gd
+  ui/combat_hud.gd
   core/input_actions.gd       Nombres de acciones como constantes (evita strings repetidos)
   core/input_bindings.gd      Autoload: registra los bindings de teclado y gamepad por defecto
   core/mouse_capture_controller.gd  Captura/liberación del cursor
@@ -68,8 +94,12 @@ scripts/
   ui/hud.gd                   Actualiza el HUD 4 veces por segundo
 resources/
   player/default_movement_settings.tres
+  player/default_action_settings.tres   Esquiva, aturdimiento, respawn
+  weapons/royal_guard_sword.tres        Espada de la Guardia Real
   materials/grid_ground.tres
 assets/shaders/grid_ground.gdshader  Grilla procedural del suelo (sin texturas)
+tests/combat_tests.gd         Pruebas automatizadas (headless)
+docs/COMBAT.md                Documentación técnica del combate
 ```
 
 ### Decisiones de diseño
@@ -81,19 +111,20 @@ assets/shaders/grid_ground.gdshader  Grilla procedural del suelo (sin texturas)
 - **Bindings en código, no en `project.godot`.** Son legibles, fáciles de comparar en el control de versiones y van a servir de base para un menú de reasignación. Si una acción ya está definida en *Project Settings → Input Map*, el autoload la respeta y no la pisa.
 - **`BoxObstacle`** (`@tool`) mantiene sincronizadas la malla y la colisión. Sus nodos hijos son internos: no se guardan en la escena ni se duplican al copiar el nodo.
 
+- **Combate por composición:** los componentes de vida, stamina, hitbox y hurtbox son nodos independientes, reutilizables por enemigos y jefes. El combate controla al jugador solo mediante una API pequeña de `PlayerController` (bloquear input y forzar la velocidad horizontal), sin reescribir la locomoción.
+
 ### Capas físicas
 
 | Capa | Nombre | Uso |
 |---|---|---|
 | 1 | `world` | Escenario estático; la máscara del SpringArm3D |
 | 2 | `player` | Cápsula del jugador |
+| 3 | `player_hurtbox` | Zona dañable del jugador |
+| 4 | `enemy_hurtbox` | Zona dañable de maniquíes y enemigos |
 
-## Compatibilidad web
+## Renderizado
 
-- El renderizador es **Compatibility** (OpenGL ES 3 / WebGL 2) en todas las plataformas.
-- No se usan texturas. Las sombras son direccionales ortogonales con un atlas de 2048 px. No hay SSAO, SSR, SDFGI, glow ni efectos que solo existen en Forward+.
-- El preset Web tiene **thread support desactivado**, así que no requiere los headers `COOP/COEP` (`SharedArrayBuffer`). Funciona en hosts estáticos simples como itch.io o GitHub Pages.
-- En web el cursor **no** se captura al iniciar, porque los navegadores solo permiten *pointer lock* después de un gesto del usuario. El HUD pide un clic.
+El renderizador actual es **Compatibility** (OpenGL 3.3), que se eligió cuando la web era un objetivo. Funciona bien en escritorio y en hardware modesto. Ahora que el objetivo es solo escritorio, se puede pasar a **Forward+** (Vulkan/D3D12) cuando se quieran gráficos más avanzados, como SSAO, glow, niebla volumétrica o muchas luces. Es un cambio de configuración, pero conviene hacerlo en una fase dedicada a lo visual.
 
 ## Exportación para Windows (verificada)
 
@@ -103,24 +134,28 @@ assets/shaders/grid_ground.gdshader  Grilla procedural del suelo (sin texturas)
 
 Windows SmartScreen puede advertir porque el ejecutable no está firmado ("Más información → Ejecutar de todas formas").
 
-## Prueba de exportación web
+## Pruebas automatizadas
 
-1. Instalá las plantillas de exportación: *Editor → Manage Export Templates → Download and Install*.
-2. *Project → Export…* → seleccioná el preset **Web** (ya incluido) → **Export Project** → guardá en `build/web/index.html`. Si la carpeta `build/web` no existe, creala antes.
-3. Serví la carpeta por HTTP. Abrir `index.html` con doble clic **no** funciona, porque `file://` bloquea la carga del `.wasm`/`.pck`:
-   ```bash
-   python -m http.server 8000 --directory build/web
-   ```
-   Alternativa: en el editor, el botón **Remote Deploy / Run in Browser** (ícono de HTML5 arriba a la derecha) levanta un servidor local automáticamente.
-4. Abrí `http://localhost:8000` en Chrome y en Firefox, y verificá:
-   - [ ] La escena carga y se ve el HUD con `Plataforma: Web` y `Render: gl_compatibility`.
-   - [ ] Clic → el cursor se captura y el mouse rota la cámara.
-   - [ ] Esc → el cursor se libera (el navegador también muestra su aviso).
-   - [ ] WASD, Shift y Espacio funcionan.
-   - [ ] Las sombras se ven y los FPS se mantienen estables.
-   - [ ] La consola del navegador (F12) no muestra errores en rojo.
+```bash
+godot --headless --path . --script res://tests/combat_tests.gd
+```
 
-## Checklist de aceptación (en el editor)
+Cargan el nivel real y verifican el movimiento de la fase 1 y todo el combate de la fase 2 (41 comprobaciones). El código de salida es la cantidad de fallas.
+
+## Checklist de la fase 2 (manual)
+
+- [ ] El personaje sigue moviéndose correctamente (fase 1 intacta).
+- [ ] El clic izquierdo ejecuta ataques ligeros y el combo llega al tercer golpe (el HUD muestra `Ataque ligero 3/3`).
+- [ ] El clic derecho ejecuta un ataque fuerte y la barra verde baja.
+- [ ] Sin stamina suficiente, el ataque fuerte no sale y aparece "Stamina insuficiente".
+- [ ] La stamina se regenera unos instantes después de gastarla.
+- [ ] Ctrl ejecuta una esquiva que gasta stamina y no atraviesa paredes.
+- [ ] Esquivando sobre la trampa justo en el pulso, aparece "Golpe evitado (invulnerable)".
+- [ ] El maniquí muestra el daño, reacciona, cae al llegar a 0 y reaparece.
+- [ ] Las barras de vida y stamina se actualizan.
+- [ ] No aparecen errores en el panel Salida/Depurador.
+
+## Checklist de aceptación de la fase 1 (en el editor)
 
 - [ ] F5 inicia sin errores en el panel *Output* / *Debugger*.
 - [ ] W/A/S/D mueven al personaje relativo a la cámara.
@@ -137,9 +172,12 @@ Windows SmartScreen puede advertir porque el ejecutable no está firmado ("Más 
 
 ## Limitaciones conocidas
 
-- **Validación de esta fase:** probada en Godot 4.7.2, tanto en el editor como en el build de Windows (AMD Radeon RX 6600, Compatibility). La exportación web **no está verificada** hasta completar la prueba de arriba.
+- **Validación:** la fase 1 se probó en Godot 4.7.2, tanto en el editor como en el build de Windows (AMD Radeon RX 6600, Compatibility). La fase 2 pasa las pruebas automatizadas headless, pero falta probarla jugando.
 - **Micro-stutter en monitores de más de 60 Hz:** el personaje se mueve en `_physics_process` (60 Hz) y no está activada la interpolación física. Esto se va a resolver en una fase posterior, cuando se defina el sistema de cámara definitivo.
 - **Sin escalones automáticos:** `CharacterBody3D` no sube escalones por sí solo. Los desniveles de más de unos 10 cm requieren saltar (es intencional en el nivel de prueba).
 - **Gamepad:** el mapeo usa la convención SDL (A = botón inferior). Los mandos no reconocidos pueden tener los ejes cambiados.
 - **Proyecto dentro de OneDrive:** la sincronización puede bloquear archivos de `.godot/` durante la importación y provocar errores intermitentes. Se recomienda pausar OneDrive mientras trabajás, o mover el proyecto fuera de la carpeta sincronizada.
-- **Escape en navegador:** el navegador intercepta Esc para salir del pointer lock. El efecto es el mismo (se libera el cursor), pero el evento puede no llegar al juego.
+- **Animaciones provisionales:** son Tweens sobre primitivas. Los tiempos de golpe e invulnerabilidad dependen de los datos y no de la animación, así que lo visual puede no coincidir perfectamente con la ventana real de impacto.
+- **Hitbox rectangular:** el golpe usa una caja frente al personaje durante la ventana activa, no sigue el arco de la espada.
+- **Ataques solo en el suelo:** no hay ataques ni esquivas en el aire.
+- **Trampa de prueba:** existe solo para probar daño e invulnerabilidad; no es contenido final.

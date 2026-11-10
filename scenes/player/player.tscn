@@ -3,6 +3,14 @@
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_controller"]
 [ext_resource type="Resource" path="res://resources/player/default_movement_settings.tres" id="2_settings"]
 [ext_resource type="PackedScene" path="res://scenes/camera/camera_rig.tscn" id="3_camera_rig"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
+[ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]
+[ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="6_health"]
+[ext_resource type="Script" path="res://scripts/combat/stamina_component.gd" id="7_stamina"]
+[ext_resource type="Script" path="res://scripts/animation/placeholder_action_animator.gd" id="8_animator"]
+[ext_resource type="Script" path="res://scripts/player/player_action_controller.gd" id="9_actions"]
+[ext_resource type="Resource" path="res://resources/weapons/royal_guard_sword.tres" id="10_sword"]
+[ext_resource type="Resource" path="res://resources/player/default_action_settings.tres" id="11_action_settings"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -25,6 +33,30 @@ roughness = 0.5
 material = SubResource("StandardMaterial3D_visor")
 size = Vector3(0.5, 0.12, 0.2)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blade"]
+albedo_color = Color(0.78, 0.8, 0.84, 1)
+metallic = 0.8
+roughness = 0.35
+
+[sub_resource type="BoxMesh" id="BoxMesh_blade"]
+material = SubResource("StandardMaterial3D_blade")
+size = Vector3(0.06, 0.12, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_guard"]
+albedo_color = Color(0.55, 0.42, 0.15, 1)
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_guard"]
+material = SubResource("StandardMaterial3D_guard")
+size = Vector3(0.32, 0.06, 0.06)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hitbox"]
+size = Vector3(1.4, 1.4, 1.6)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
+radius = 0.42
+height = 1.8
+
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("orientation_reference", "visual_root")]
 collision_layer = 2
 collision_mask = 1
@@ -39,13 +71,75 @@ shape = SubResource("CapsuleShape3D_body")
 
 [node name="Visual" type="Node3D" parent="."]
 
-[node name="Body" type="MeshInstance3D" parent="Visual"]
+[node name="Rig" type="Node3D" parent="Visual"]
 position = Vector3(0, 0.9, 0)
+
+[node name="Body" type="MeshInstance3D" parent="Visual/Rig"]
 mesh = SubResource("CapsuleMesh_body")
 
-[node name="Visor" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.55, -0.32)
+[node name="Visor" type="MeshInstance3D" parent="Visual/Rig"]
+position = Vector3(0, 0.65, -0.32)
 mesh = SubResource("BoxMesh_visor")
+
+[node name="WeaponPivot" type="Node3D" parent="Visual/Rig"]
+position = Vector3(0.45, 0.2, -0.15)
+rotation = Vector3(-0.610865, 0, 0)
+
+[node name="Blade" type="MeshInstance3D" parent="Visual/Rig/WeaponPivot"]
+position = Vector3(0, 0, -0.6)
+mesh = SubResource("BoxMesh_blade")
+
+[node name="Guard" type="MeshInstance3D" parent="Visual/Rig/WeaponPivot"]
+position = Vector3(0, 0, -0.08)
+mesh = SubResource("BoxMesh_guard")
+
+[node name="AttackHitbox" type="Area3D" parent="Visual"]
+collision_layer = 0
+collision_mask = 8
+monitorable = false
+script = ExtResource("4_hitbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Visual/AttackHitbox"]
+position = Vector3(0, 1, -1.15)
+shape = SubResource("BoxShape3D_hitbox")
+
+[node name="Hurtbox" type="Area3D" parent="." node_paths=PackedStringArray("health")]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hurtbox")
+health = NodePath("../HealthComponent")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_hurtbox")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("6_health")
+max_health = 100.0
+
+[node name="StaminaComponent" type="Node" parent="."]
+script = ExtResource("7_stamina")
+max_stamina = 100.0
+regen_per_second = 30.0
+regen_delay = 0.8
+
+[node name="ActionAnimator" type="Node" parent="." node_paths=PackedStringArray("rig", "weapon_pivot", "flash_target")]
+script = ExtResource("8_animator")
+rig = NodePath("../Visual/Rig")
+weapon_pivot = NodePath("../Visual/Rig/WeaponPivot")
+flash_target = NodePath("../Visual/Rig/Body")
+
+[node name="ActionController" type="Node" parent="." node_paths=PackedStringArray("player", "health", "stamina", "hitbox", "animator")]
+process_physics_priority = -10
+script = ExtResource("9_actions")
+player = NodePath("..")
+health = NodePath("../HealthComponent")
+stamina = NodePath("../StaminaComponent")
+hitbox = NodePath("../Visual/AttackHitbox")
+animator = NodePath("../ActionAnimator")
+weapon = ExtResource("10_sword")
+settings = ExtResource("11_action_settings")
 
 [node name="CameraRig" parent="." instance=ExtResource("3_camera_rig")]
 position = Vector3(0, 1.5, 0)

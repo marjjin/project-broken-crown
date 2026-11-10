@@ -1,0 +1,76 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/combat_hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_background"]
+bg_color = Color(0.05, 0.05, 0.06, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health"]
+bg_color = Color(0.62, 0.1, 0.1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina"]
+bg_color = Color(0.3, 0.6, 0.25, 1)
+
+[node name="CombatHUD" type="CanvasLayer" node_paths=PackedStringArray("health_bar", "stamina_bar", "state_label", "feedback_label")]
+script = ExtResource("1_hud")
+health_bar = NodePath("Bars/HealthBar")
+stamina_bar = NodePath("Bars/StaminaBar")
+state_label = NodePath("Bars/StateLabel")
+feedback_label = NodePath("FeedbackLabel")
+
+[node name="Bars" type="VBoxContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -96.0
+offset_right = 336.0
+offset_bottom = -16.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="HealthBar" type="ProgressBar" parent="Bars"]
+custom_minimum_size = Vector2(320, 16)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_background")
+theme_override_styles/fill = SubResource("StyleBoxFlat_health")
+value = 100.0
+show_percentage = false
+
+[node name="StaminaBar" type="ProgressBar" parent="Bars"]
+custom_minimum_size = Vector2(260, 10)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_background")
+theme_override_styles/fill = SubResource("StyleBoxFlat_stamina")
+value = 100.0
+show_percentage = false
+
+[node name="StateLabel" type="Label" parent="Bars"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 15
+text = "Estado: Locomocion"
+
+[node name="FeedbackLabel" type="Label" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -250.0
+offset_top = 24.0
+offset_right = 250.0
+offset_bottom = 56.0
+grow_horizontal = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1

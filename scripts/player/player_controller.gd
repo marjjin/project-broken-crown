@@ -6,6 +6,10 @@ extends CharacterBody3D
 ## The body itself never rotates; only `visual_root` turns toward the movement
 ## direction. This keeps child nodes (like the camera rig) free from inheriting
 ## the character's facing, and keeps the collision capsule orientation stable.
+##
+## Other systems (combat) never touch velocity directly. They use the small
+## public API below: disable player input, or override horizontal velocity.
+## Gravity and move_and_slide() always run here, so collisions are respected.
 
 ## Below this height the player is returned to its spawn point.
 const FALL_RESET_HEIGHT := -25.0
@@ -18,6 +22,12 @@ const FALL_RESET_HEIGHT := -25.0
 
 var _sprinting := false
 var _spawn_transform: Transform3D
+var _input_enabled := true
+var _horizontal_override := Vector3.ZERO
+var _override_active := false
+## Camera-relative input direction of the last physics frame, even while input
+## is disabled, so actions (attacks, dodges) can aim with it.
+var _move_direction := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -35,14 +45,20 @@ func _physics_process(delta: float) -> void:
 	var input := Input.get_vector(
 		InputActions.MOVE_LEFT, InputActions.MOVE_RIGHT,
 		InputActions.MOVE_FORWARD, InputActions.MOVE_BACK)
-	var wish_direction := _get_wish_direction(input)
-	var input_strength := minf(input.length(), 1.0)
+	_move_direction = _get_wish_direction(input)
+	var wish_direction := _move_direction if _input_enabled else Vector3.ZERO
+	var input_strength := minf(input.length(), 1.0) if _input_enabled else 0.0
 
 	_sprinting = input_strength > 0.0 and Input.is_action_pressed(InputActions.SPRINT)
 
 	_apply_gravity(delta)
-	_try_jump()
-	_update_horizontal_velocity(wish_direction, input_strength, delta)
+	if _input_enabled:
+		_try_jump()
+	if _override_active:
+		velocity.x = _horizontal_override.x
+		velocity.z = _horizontal_override.z
+	else:
+		_update_horizontal_velocity(wish_direction, input_strength, delta)
 	move_and_slide()
 	_rotate_visual(wish_direction, delta)
 	_reset_if_fallen()
@@ -50,6 +66,46 @@ func _physics_process(delta: float) -> void:
 
 func is_sprinting() -> bool:
 	return _sprinting
+
+
+## When disabled, movement input, jumping and turning are ignored; the body
+## decelerates normally (unless a velocity override is active).
+func set_input_enabled(enabled: bool) -> void:
+	_input_enabled = enabled
+
+
+func set_horizontal_override(horizontal_velocity: Vector3) -> void:
+	_horizontal_override = horizontal_velocity
+	_override_active = true
+
+
+func clear_horizontal_override() -> void:
+	_override_active = false
+
+
+func get_move_direction() -> Vector3:
+	return _move_direction
+
+
+## Flat forward direction of the visual model (-Z of `visual_root`).
+func get_facing_direction() -> Vector3:
+	if visual_root == null:
+		return Vector3.FORWARD
+	var forward := -visual_root.global_basis.z
+	forward.y = 0.0
+	return forward.normalized() if forward.length_squared() > 0.0001 else Vector3.FORWARD
+
+
+func face_toward(direction: Vector3) -> void:
+	if visual_root == null or Vector2(direction.x, direction.z).length_squared() < 0.0001:
+		return
+	visual_root.rotation.y = atan2(-direction.x, -direction.z)
+
+
+func respawn() -> void:
+	global_transform = _spawn_transform
+	velocity = Vector3.ZERO
+	clear_horizontal_override()
 
 
 func get_horizontal_speed() -> float:
@@ -110,5 +166,4 @@ func _reset_if_fallen() -> void:
 	if global_position.y >= FALL_RESET_HEIGHT:
 		return
 	push_warning("PlayerController: fell out of the level; resetting to spawn.")
-	global_transform = _spawn_transform
-	velocity = Vector3.ZERO
+	respawn()

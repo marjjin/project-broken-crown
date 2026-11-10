@@ -29,6 +29,10 @@ func _enter_tree() -> void:
 	_register(InputActions.JUMP, [_key(KEY_SPACE), _button(JOY_BUTTON_A)])
 	_register(InputActions.RELEASE_MOUSE, [_key(KEY_ESCAPE)])
 
+	_register(InputActions.ATTACK_LIGHT, [_mouse(MOUSE_BUTTON_LEFT), _button(JOY_BUTTON_RIGHT_SHOULDER)])
+	_register(InputActions.ATTACK_HEAVY, [_mouse(MOUSE_BUTTON_RIGHT), _axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)])
+	_register(InputActions.DODGE, [_key(KEY_CTRL), _button(JOY_BUTTON_B)])
+
 
 func _register(action: StringName, events: Array) -> void:
 	if InputMap.has_action(action):
@@ -48,6 +52,12 @@ static func _axis(axis: JoyAxis, direction: float) -> InputEventJoypadMotion:
 	var event := InputEventJoypadMotion.new()
 	event.axis = axis
 	event.axis_value = direction
+	return event
+
+
+static func _mouse(button: MouseButton) -> InputEventMouseButton:
+	var event := InputEventMouseButton.new()
+	event.button_index = button
 	return event
 
 

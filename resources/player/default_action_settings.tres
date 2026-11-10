@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PlayerActionSettings" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/player_action_settings.gd" id="1_actions"]
+
+[resource]
+script = ExtResource("1_actions")
+dodge_stamina_cost = 20.0
+dodge_duration = 0.42
+dodge_distance = 4.2
+dodge_invulnerability_start = 0.04
+dodge_invulnerability_end = 0.3
+dodge_cooldown = 0.2
+neutral_dodge_backwards = true
+stagger_duration = 0.4
+respawn_delay = 3.0

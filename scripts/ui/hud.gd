@@ -47,6 +47,9 @@ func _build_instructions() -> String:
 		"Mouse / Stick der. - Camara",
 		"Shift / L3 - Correr",
 		"Espacio / A - Saltar" + ("" if jump_enabled else " (desactivado)"),
+		"Clic izq. / RB - Ataque ligero (combo x3)",
+		"Clic der. / RT - Ataque fuerte (stamina)",
+		"Ctrl / B - Esquiva (stamina)",
 		"Esc - Liberar mouse   |   Clic - Capturar",
 	])
 
