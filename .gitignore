@@ -1,0 +1,6 @@
+# Godot cache / imports
+.godot/
+
+# Export output (the .gdignore keeps Godot from importing it)
+build/*
+!build/.gdignore

@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/level/box_obstacle.gd" id="1_box"]
+
+[node name="BoxObstacle" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_box")

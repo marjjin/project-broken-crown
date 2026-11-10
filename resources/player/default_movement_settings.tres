@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MovementSettings" format=3]
+
+[ext_resource type="Script" path="res://scripts/player/movement_settings.gd" id="1_movement"]
+
+[resource]
+script = ExtResource("1_movement")
+walk_speed = 4.5
+sprint_speed = 7.5
+acceleration = 30.0
+deceleration = 40.0
+air_control = 0.35
+rotation_speed = 12.0
+gravity_scale = 1.6
+max_fall_speed = 40.0
+jump_enabled = true
+jump_height = 1.1
