@@ -1,0 +1,169 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_character.gd" id="1_character"]
+[ext_resource type="Resource" path="res://resources/enemies/corrupted_soldier.tres" id="2_data"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_perception.gd" id="3_perception"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_brain.gd" id="4_brain"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_debug_view.gd" id="5_debug"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_navigator.gd" id="6_navigator"]
+[ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="7_health"]
+[ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="8_hurtbox"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="9_hitbox"]
+[ext_resource type="Script" path="res://scripts/animation/placeholder_action_animator.gd" id="10_animator"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_melee_attack.gd" id="11_attack"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.42
+height = 1.85
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_armor"]
+albedo_color = Color(0.17, 0.15, 0.17, 1)
+metallic = 0.6
+roughness = 0.55
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+material = SubResource("StandardMaterial3D_armor")
+radius = 0.42
+height = 1.85
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_helmet"]
+albedo_color = Color(0.25, 0.22, 0.2, 1)
+metallic = 0.7
+roughness = 0.45
+
+[sub_resource type="BoxMesh" id="BoxMesh_helmet"]
+material = SubResource("StandardMaterial3D_helmet")
+size = Vector3(0.5, 0.42, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_corruption"]
+albedo_color = Color(0.55, 0.1, 0.75, 1)
+emission_enabled = true
+emission = Color(0.55, 0.1, 0.75, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_eyes"]
+material = SubResource("StandardMaterial3D_corruption")
+size = Vector3(0.36, 0.06, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blade"]
+albedo_color = Color(0.35, 0.33, 0.32, 1)
+metallic = 0.8
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_blade"]
+material = SubResource("StandardMaterial3D_blade")
+size = Vector3(0.07, 0.14, 1.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hitbox"]
+size = Vector3(1.2, 1.4, 1.7)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
+radius = 0.45
+height = 1.85
+
+[node name="CorruptedSoldier" type="CharacterBody3D" groups=["enemies"] node_paths=PackedStringArray("visual_root", "body_shape")]
+collision_layer = 16
+collision_mask = 19
+script = ExtResource("1_character")
+data = ExtResource("2_data")
+visual_root = NodePath("Visual")
+body_shape = NodePath("CollisionShape3D")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.925, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Rig" type="Node3D" parent="Visual"]
+position = Vector3(0, 0.925, 0)
+
+[node name="Body" type="MeshInstance3D" parent="Visual/Rig"]
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Helmet" type="MeshInstance3D" parent="Visual/Rig"]
+position = Vector3(0, 0.72, 0)
+mesh = SubResource("BoxMesh_helmet")
+
+[node name="Eyes" type="MeshInstance3D" parent="Visual/Rig"]
+position = Vector3(0, 0.74, -0.26)
+mesh = SubResource("BoxMesh_eyes")
+
+[node name="WeaponPivot" type="Node3D" parent="Visual/Rig"]
+position = Vector3(0.48, 0.15, -0.12)
+rotation = Vector3(-0.610865, 0, 0)
+
+[node name="Blade" type="MeshInstance3D" parent="Visual/Rig/WeaponPivot"]
+position = Vector3(0, 0, -0.62)
+mesh = SubResource("BoxMesh_blade")
+
+[node name="AttackHitbox" type="Area3D" parent="Visual"]
+collision_layer = 0
+collision_mask = 4
+monitorable = false
+script = ExtResource("9_hitbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Visual/AttackHitbox"]
+position = Vector3(0, 1, -1.2)
+shape = SubResource("BoxShape3D_hitbox")
+
+[node name="Hurtbox" type="Area3D" parent="." node_paths=PackedStringArray("health")]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("8_hurtbox")
+health = NodePath("../HealthComponent")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+position = Vector3(0, 0.925, 0)
+shape = SubResource("CapsuleShape3D_hurtbox")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("7_health")
+
+[node name="ActionAnimator" type="Node" parent="." node_paths=PackedStringArray("rig", "weapon_pivot", "flash_target")]
+script = ExtResource("10_animator")
+rig = NodePath("../Visual/Rig")
+weapon_pivot = NodePath("../Visual/Rig/WeaponPivot")
+flash_target = NodePath("../Visual/Rig/Body")
+flash_color = Color(1, 0.95, 0.85, 0.8)
+death_drop = 0.5
+
+[node name="MeleeAttack" type="Node" parent="." node_paths=PackedStringArray("body", "hitbox", "animator")]
+process_physics_priority = -5
+script = ExtResource("11_attack")
+body = NodePath("..")
+hitbox = NodePath("../Visual/AttackHitbox")
+animator = NodePath("../ActionAnimator")
+
+[node name="Perception" type="Node" parent="." node_paths=PackedStringArray("body")]
+process_physics_priority = -20
+script = ExtResource("3_perception")
+body = NodePath("..")
+
+[node name="Navigator" type="NavigationAgent3D" parent="."]
+path_desired_distance = 1.0
+target_desired_distance = 1.0
+path_max_distance = 3.0
+radius = 0.45
+height = 1.85
+script = ExtResource("6_navigator")
+
+[node name="Brain" type="Node" parent="." node_paths=PackedStringArray("body", "perception", "navigator", "attack", "health", "hurtbox", "animator")]
+process_physics_priority = -10
+script = ExtResource("4_brain")
+body = NodePath("..")
+perception = NodePath("../Perception")
+navigator = NodePath("../Navigator")
+attack = NodePath("../MeleeAttack")
+health = NodePath("../HealthComponent")
+hurtbox = NodePath("../Hurtbox")
+animator = NodePath("../ActionAnimator")
+
+[node name="DebugView" type="Node3D" parent="." node_paths=PackedStringArray("brain", "body", "perception", "navigation_agent")]
+position = Vector3(0, 2.4, 0)
+script = ExtResource("5_debug")
+brain = NodePath("../Brain")
+body = NodePath("..")
+perception = NodePath("../Perception")
+navigation_agent = NodePath("../Navigator")

@@ -23,6 +23,8 @@ const FALL_RESET_HEIGHT := -25.0
 var _sprinting := false
 var _spawn_transform: Transform3D
 var _input_enabled := true
+var _jump_allowed := true
+var _speed_multiplier := 1.0
 var _horizontal_override := Vector3.ZERO
 var _override_active := false
 ## Camera-relative input direction of the last physics frame, even while input
@@ -52,7 +54,7 @@ func _physics_process(delta: float) -> void:
 	_sprinting = input_strength > 0.0 and Input.is_action_pressed(InputActions.SPRINT)
 
 	_apply_gravity(delta)
-	if _input_enabled:
+	if _input_enabled and _jump_allowed:
 		_try_jump()
 	if _override_active:
 		velocity.x = _horizontal_override.x
@@ -60,7 +62,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		_update_horizontal_velocity(wish_direction, input_strength, delta)
 	move_and_slide()
-	_rotate_visual(wish_direction, delta)
+	_rotate_visual(_get_facing_target(wish_direction), delta)
 	_reset_if_fallen()
 
 
@@ -74,6 +76,15 @@ func set_input_enabled(enabled: bool) -> void:
 	_input_enabled = enabled
 
 
+## Scales walk/sprint speed (e.g. while attacking). 1 = normal.
+func set_movement_multiplier(multiplier: float) -> void:
+	_speed_multiplier = maxf(multiplier, 0.0)
+
+
+func set_jump_allowed(allowed: bool) -> void:
+	_jump_allowed = allowed
+
+
 func set_horizontal_override(horizontal_velocity: Vector3) -> void:
 	_horizontal_override = horizontal_velocity
 	_override_active = true
@@ -84,6 +95,14 @@ func clear_horizontal_override() -> void:
 
 
 func get_move_direction() -> Vector3:
+	return _move_direction
+
+
+## Direction actions should aim at: the camera's forward in camera-facing
+## mode, otherwise the held movement direction (ZERO if none).
+func get_aim_direction() -> Vector3:
+	if settings.face_camera_direction:
+		return _get_camera_forward()
 	return _move_direction
 
 
@@ -141,7 +160,7 @@ func _try_jump() -> void:
 
 
 func _update_horizontal_velocity(wish_direction: Vector3, input_strength: float, delta: float) -> void:
-	var target_speed := settings.sprint_speed if _sprinting else settings.walk_speed
+	var target_speed := (settings.sprint_speed if _sprinting else settings.walk_speed) * _speed_multiplier
 	var target_velocity := wish_direction * target_speed * input_strength
 
 	var rate := settings.acceleration if input_strength > 0.0 else settings.deceleration
@@ -151,6 +170,25 @@ func _update_horizontal_velocity(wish_direction: Vector3, input_strength: float,
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z).move_toward(target_velocity, rate * delta)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
+
+
+## What the model should turn toward this frame (ZERO = keep current facing).
+## Nothing turns while input is locked (stagger, death) or during a dodge,
+## whose roll direction is set explicitly by the combat system.
+func _get_facing_target(wish_direction: Vector3) -> Vector3:
+	if not _input_enabled or _override_active:
+		return Vector3.ZERO
+	if settings.face_camera_direction:
+		return _get_camera_forward()
+	return wish_direction
+
+
+func _get_camera_forward() -> Vector3:
+	if not is_instance_valid(orientation_reference):
+		return Vector3.ZERO
+	var forward := -orientation_reference.global_basis.z
+	forward.y = 0.0
+	return forward.normalized() if forward.length_squared() > 0.0001 else Vector3.ZERO
 
 
 func _rotate_visual(wish_direction: Vector3, delta: float) -> void:

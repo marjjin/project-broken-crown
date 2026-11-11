@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.16, 0.18, 0.24, 1)
+sky_horizon_color = Color(0.46, 0.43, 0.4, 1)
+ground_bottom_color = Color(0.08, 0.08, 0.09, 1)
+ground_horizon_color = Color(0.46, 0.43, 0.4, 1)
+
+[sub_resource type="Sky" id="Sky_main"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 2
+sky = SubResource("Sky_main")
+ambient_light_source = 3
+ambient_light_energy = 0.6
+tonemap_mode = 2
+
+[node name="TestEnvironment" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+position = Vector3(0, 10, 0)
+rotation = Vector3(-0.872665, -0.610865, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+shadow_enabled = true
+directional_shadow_mode = 0
+directional_shadow_max_distance = 50.0

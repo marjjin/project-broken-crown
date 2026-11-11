@@ -21,6 +21,24 @@ func _ready() -> void:
 	_current_health = max_health
 
 
+## Lets data resources (e.g. EnemyData) own the max value. Refills by default.
+func set_max_health(value: float, refill: bool = true) -> void:
+	max_health = maxf(value, 1.0)
+	_current_health = max_health if refill else minf(_current_health, max_health)
+	health_changed.emit(_current_health, max_health)
+
+
+## Finds the HealthComponent among `node`'s direct children (null if none).
+## Avoids hard-coded node paths when one entity needs another's health.
+static func find_in(node: Node) -> HealthComponent:
+	if node == null:
+		return null
+	for child in node.get_children():
+		if child is HealthComponent:
+			return child
+	return null
+
+
 func get_current() -> float:
 	return _current_health
 

@@ -33,6 +33,11 @@ extends Resource
 @export_range(0.0, 3.0, 0.01, "suffix:s") var heavy_hit_start: float = 0.5
 @export_range(0.0, 3.0, 0.01, "suffix:s") var heavy_hit_end: float = 0.68
 
+@export_group("Movement")
+## Movement speed while attacking, as a fraction of normal speed
+## (1 = move freely, 0 = rooted in place until the recovery window).
+@export_range(0.0, 1.0, 0.05) var attack_move_speed_multiplier: float = 1.0
+
 @export_group("Combo")
 ## From this time into an attack, a new attack/dodge input is buffered and
 ## executed as soon as the attack ends. Earlier presses are ignored.

@@ -43,6 +43,9 @@ PlayerActionController ──activate()──► Hitbox ──hit_detected(hurtb
 | 2 | `player` | Cápsula del jugador |
 | 3 | `player_hurtbox` | Hurtbox del jugador. Máscara de los hitboxes enemigos y de la trampa |
 | 4 | `enemy_hurtbox` | Hurtbox de maniquíes y enemigos. Máscara del hitbox del jugador |
+| 5 | `enemy` | Cuerpo físico de los enemigos. El jugador lo incluye en su máscara para no atravesarlos |
+
+Los enemigos (fase 3) usan exactamente este mismo circuito de daño. Ver [ENEMIES.md](ENEMIES.md).
 
 Los hitboxes usan `collision_layer = 0`, `monitoring = true` y `monitorable = false`. Los hurtboxes usan `collision_mask = 0`, `monitoring = false` y `monitorable = true`.
 
@@ -87,7 +90,8 @@ Línea de tiempo de un ataque (en segundos desde el inicio):
           ▲ desde combo_input_open el input queda en el buffer y se ejecuta al llegar a duration
 ```
 
-- Durante la recuperación el jugador ya puede moverse y la ventana de combo sigue abierta.
+- Durante el golpe el jugador se mueve según `attack_move_speed_multiplier` (hoy 1 = libre) y el golpe sigue la dirección en la que se mueve. No puede saltar hasta la recuperación.
+- Durante la recuperación tiene movimiento y salto completos, y la ventana de combo sigue abierta.
 - Si la ventana expira, el siguiente ataque ligero vuelve al golpe 1.
 - La esquiva usa `PlayerController.set_horizontal_override()`, pero `move_and_slide()` sigue corriendo en el controlador, así que **respeta las colisiones**. La velocidad decrece linealmente (`v = 2d/T · (1 − t/T)`), lo que recorre exactamente `dodge_distance` si no hay obstáculos.
 - Sin dirección de movimiento, la esquiva es un paso atrás (configurable con `neutral_dodge_backwards`).
@@ -106,6 +110,7 @@ Línea de tiempo de un ataque (en segundos desde el inicio):
 | `reach` / `hit_width` / `hit_height` | 1.6 / 1.4 / 1.4 m | Tamaño del hitbox frente al personaje |
 | `light_duration`, `light_hit_start`, `light_hit_end` | 0.45 / 0.14 / 0.30 s | |
 | `heavy_duration`, `heavy_hit_start`, `heavy_hit_end` | 0.90 / 0.50 / 0.68 s | |
+| `attack_move_speed_multiplier` | 1.0 | Velocidad de movimiento durante el golpe (1 = libre, 0 = clavado en el lugar hasta la recuperación). El salto queda bloqueado durante el golpe |
 | `combo_input_open` | 0.15 s | Desde cuándo se guarda el siguiente input en el buffer |
 | `recovery_time` | 0.35 s | Ventana para encadenar después de cada ataque |
 
@@ -134,12 +139,13 @@ Línea de tiempo de un ataque (en segundos desde el inicio):
 ## Cómo extender
 
 - **Arma nueva:** creá un `.tres` de tipo `WeaponData` y asignalo en `ActionController.weapon`. No hace falta tocar código.
-- **Enemigo:** se arma con `HealthComponent`, un `Hurtbox` en la capa 4 y un `Hitbox` con máscara en la capa 3. Su IA llama a `hitbox.activate()`/`deactivate()` y aplica el daño en `hit_detected`, igual que la trampa.
+- **Enemigo:** ya implementado en la fase 3 (`EnemyMeleeAttack`), con `HealthComponent`, un `Hurtbox` en la capa 4 y un `Hitbox` con máscara en la capa 3. Ver [ENEMIES.md](ENEMIES.md).
+- `ActionAnimator` sumó `play_attack(windup, active, recovery)` (ataque genérico en tres fases) y `play_hit(interrupting = true)`. Con `false` el golpe solo hace destellar al personaje, sin cortar su pose.
 - **Animaciones reales:** creá un script que extienda `ActionAnimator` y use `AnimationPlayer`/`AnimationTree` en sus métodos, y reemplazá el nodo `ActionAnimator`. Las reglas del juego (ventanas e i-frames) dependen de los datos, no de la animación, así que no cambian. Si en el futuro se quiere que la animación marque los tiempos, se pueden usar *method tracks* que llamen a `hitbox.activate()`.
 
 ## Pruebas automatizadas
 
-`tests/combat_tests.gd` carga el nivel real y verifica 41 condiciones: movimiento, golpes sin duplicados, combo, ventanas, stamina, reglas de estado, i-frames, esquiva contra paredes, muerte del maniquí, daño y respawn del jugador, trampa, eventos de input reales y HUD.
+`tests/combat_tests.gd` carga el nivel real y verifica 48 condiciones: movimiento, golpes sin duplicados, combo, ventanas, stamina, reglas de estado, i-frames, esquiva contra paredes, muerte del maniquí, daño y respawn del jugador, trampa, eventos de input reales y HUD.
 
 ```bash
 godot --headless --path . --script res://tests/combat_tests.gd

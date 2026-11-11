@@ -162,10 +162,14 @@ func _start_attack(state: State, damage: float, attack_name: StringName) -> void
 	_hit_window_opened = false
 	_recovery_started = false
 	_buffered = Action.NONE
-	player.set_input_enabled(false)
+	# Movement during the swing is a per-weapon choice (0 = rooted, 1 = free).
+	var move_multiplier := weapon.attack_move_speed_multiplier
+	player.set_input_enabled(move_multiplier > 0.0)
+	player.set_movement_multiplier(move_multiplier)
+	player.set_jump_allowed(false)
 	player.clear_horizontal_override()
-	# Attacks snap toward the held direction, otherwise keep the current facing.
-	player.face_toward(player.get_move_direction())
+	# Attacks snap toward the aim (camera forward, or the held direction).
+	player.face_toward(player.get_aim_direction())
 	_set_state(state)
 
 
@@ -180,8 +184,8 @@ func _update_attack(duration: float, hit_start: float, hit_end: float) -> void:
 		return
 	if not _recovery_started:
 		_recovery_started = true
-		# Recovery: the player may move again; the combo window stays open.
-		player.set_input_enabled(true)
+		# Recovery: full movement and jumping again; the combo window stays open.
+		_restore_player_movement()
 		if _buffered != Action.NONE:
 			var action := _buffered
 			_buffered = Action.NONE
@@ -240,8 +244,16 @@ func _respawn() -> void:
 func _reset_action_side_effects() -> void:
 	hitbox.deactivate()
 	player.clear_horizontal_override()
+	player.set_movement_multiplier(1.0)
+	player.set_jump_allowed(true)
 	health.set_invulnerable(false)
 	_buffered = Action.NONE
+
+
+func _restore_player_movement() -> void:
+	player.set_input_enabled(true)
+	player.set_movement_multiplier(1.0)
+	player.set_jump_allowed(true)
 
 
 func _set_state(state: State) -> void:

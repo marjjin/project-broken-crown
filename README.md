@@ -4,9 +4,9 @@ RPG de acción 3D en tercera persona, ambientado en un mundo medieval de fantas�
 
 **Plataforma objetivo: escritorio (Windows; Steam a futuro).** La versión web quedó descartada.
 
-**Fase actual: 2 — Sistema de combate.** Incluye espada, combo de tres golpes, ataque fuerte, esquiva con invulnerabilidad, vida y stamina, y maniquíes de entrenamiento. Todavía no hay enemigos con IA, inventario ni persistencia.
+**Fase actual: 3 — IA de enemigos.** El **Soldado Corrompido** patrulla, detecta al jugador por vista (con paredes que bloquean), lo persigue con navegación 3D, ataca, recibe daño y muere. Se suma al combate de la fase 2 (espada, combo, ataque fuerte, esquiva, vida y stamina). Todavía no hay jefes, inventario, misiones ni persistencia.
 
-Documentación técnica del combate: [docs/COMBAT.md](docs/COMBAT.md).
+Documentación técnica: [docs/COMBAT.md](docs/COMBAT.md) (combate) · [docs/ENEMIES.md](docs/ENEMIES.md) (enemigos e IA).
 
 ---
 
@@ -47,6 +47,7 @@ godot --path . -e # abre el editor
 | Esquiva (20 stamina) | Ctrl | B / Círculo |
 | Liberar el mouse | Esc | — |
 | Capturar el mouse | Clic izquierdo | — |
+| Depuración de enemigos (mostrar/ocultar) | F3 | — |
 
 Las teclas usan *physical keycodes*: WASD queda en la misma posición física con distribuciones AZERTY/QWERTZ.
 
@@ -54,6 +55,8 @@ El salto se desactiva sin tocar código: abrí `resources/player/default_movemen
 
 - **Combo:** volvé a hacer clic durante el golpe para encadenar; el tercero hace más daño.
 - **Esquiva:** con dirección, ruedas hacia ella; sin dirección, das un paso atrás.
+- **Orientación:** el personaje siempre mira hacia donde apunta la cámara. W avanza, S retrocede, A/D se desplazan de costado, y los golpes salen hacia adelante de la cámara. Para volver al modo anterior (el personaje gira hacia donde camina), desmarcá **Face Camera Direction** en `resources/player/default_movement_settings.tres`.
+- **Moverse atacando:** podés caminar y correr libremente mientras golpeás (configurable por arma con `attack_move_speed_multiplier`); el salto se bloquea hasta el final del golpe.
 - **Clic para capturar:** el clic que captura el mouse no dispara un ataque.
 
 ### En el nivel
@@ -63,6 +66,17 @@ El salto se desactiva sin tocar código: abrí `resources/player/default_movemen
 - **Muerte:** si tu vida llega a 0, reaparecés a los 3 s.
 
 Los ajustes del combate están en `resources/weapons/royal_guard_sword.tres` y `resources/player/default_action_settings.tres`. Ver [docs/COMBAT.md](docs/COMBAT.md).
+
+### Arena de enemigos (fase 3)
+
+La IA se prueba en una escena aparte, para no tocar el nivel principal: **`scenes/test/enemy_test_arena.tscn`**. Abrila desde el panel *Sistema de archivos* y presioná **F6** (*Ejecutar escena actual*). **F5** sigue abriendo el nivel principal.
+
+- **Al empezar:** aparecés al sur, detrás de un muro. El Soldado Corrompido patrulla un rectángulo de cuatro puntos al norte.
+- **Detección:** con la depuración (F3) ves sobre él su estado y su vida, el círculo de detección, los bordes de su campo de visión y la ruta de navegación en celeste. No te ve a través de los muros ni por la espalda, salvo que estés muy cerca.
+- **Combate:** levanta la espada (preparación), golpea y se recupera. Esquivá justo cuando baja la espada para evitar el daño con la invulnerabilidad. Tus golpes lo aturden; después de un aturdimiento tiene unos instantes de inmunidad.
+- **Perder la persecución:** corré (Shift), alejate o escondete detrás de un muro. A los 3 s sin verte vuelve a su patrulla.
+- **Plataforma baja** (noroeste): podés subir saltando, él no. Se queda en el borde mirándote.
+- **Datos del soldado:** `resources/enemies/corrupted_soldier.tres`. Ver [docs/ENEMIES.md](docs/ENEMIES.md).
 
 ## Estructura
 
@@ -78,7 +92,13 @@ scenes/
   combat/damage_pulse_trap.tscn  Trampa de prueba (daño periódico)
   ui/hud.tscn                 HUD mínimo (controles + estado)
   ui/combat_hud.tscn          Barras de vida/stamina y estado de acción
+  enemies/corrupted_soldier.tscn  Soldado Corrompido (primer enemigo)
+  level/test_environment.tscn Cielo + sol reutilizables para escenas de prueba
+  test/enemy_test_arena.tscn  Arena de IA: navmesh, patrulla, muros de cobertura, plataforma
 scripts/
+  enemies/                    EnemyData, EnemyCharacter, EnemyPerception, EnemyNavigator,
+                              EnemyMeleeAttack, EnemyBrain, EnemyDebugView
+  level/runtime_navigation_region.gd  Genera el navmesh al cargar el nivel
   combat/                     Vida, stamina, hitbox, hurtbox, DamageInfo, WeaponData, PlayerActionSettings
   animation/                  Interfaz ActionAnimator + animaciones provisionales con Tweens
   player/player_action_controller.gd  Máquina de estados de combate
@@ -96,10 +116,13 @@ resources/
   player/default_movement_settings.tres
   player/default_action_settings.tres   Esquiva, aturdimiento, respawn
   weapons/royal_guard_sword.tres        Espada de la Guardia Real
+  enemies/corrupted_soldier.tres        Estadísticas del Soldado Corrompido
   materials/grid_ground.tres
 assets/shaders/grid_ground.gdshader  Grilla procedural del suelo (sin texturas)
-tests/combat_tests.gd         Pruebas automatizadas (headless)
+tests/combat_tests.gd         Pruebas automatizadas fases 1-2 (headless)
+tests/enemy_tests.gd          Pruebas automatizadas fase 3 (headless)
 docs/COMBAT.md                Documentación técnica del combate
+docs/ENEMIES.md               Documentación técnica de enemigos e IA
 ```
 
 ### Decisiones de diseño
@@ -112,6 +135,7 @@ docs/COMBAT.md                Documentación técnica del combate
 - **`BoxObstacle`** (`@tool`) mantiene sincronizadas la malla y la colisión. Sus nodos hijos son internos: no se guardan en la escena ni se duplican al copiar el nodo.
 
 - **Combate por composición:** los componentes de vida, stamina, hitbox y hurtbox son nodos independientes, reutilizables por enemigos y jefes. El combate controla al jugador solo mediante una API pequeña de `PlayerController` (bloquear input y forzar la velocidad horizontal), sin reescribir la locomoción.
+- **IA separada en piezas:** el enemigo tiene datos (`EnemyData`), cuerpo, percepción, navegación, ataque y cerebro como nodos distintos. El cerebro decide y los demás ejecutan. El enemigo reutiliza el mismo sistema de daño que el jugador, así que la esquiva lo evita sin código extra. Encuentra al jugador por el grupo `player`, sin rutas de escena rígidas.
 
 ### Capas físicas
 
@@ -121,6 +145,7 @@ docs/COMBAT.md                Documentación técnica del combate
 | 2 | `player` | Cápsula del jugador |
 | 3 | `player_hurtbox` | Zona dañable del jugador |
 | 4 | `enemy_hurtbox` | Zona dañable de maniquíes y enemigos |
+| 5 | `enemy` | Cuerpo físico de los enemigos (el jugador choca con ellos) |
 
 ## Renderizado
 
@@ -137,10 +162,26 @@ Windows SmartScreen puede advertir porque el ejecutable no está firmado ("Más 
 ## Pruebas automatizadas
 
 ```bash
-godot --headless --path . --script res://tests/combat_tests.gd
+godot --headless --path . --script res://tests/combat_tests.gd   # fases 1-2: 48 comprobaciones
+godot --headless --path . --script res://tests/enemy_tests.gd    # fase 3: 52 comprobaciones
 ```
 
-Cargan el nivel real y verifican el movimiento de la fase 1 y todo el combate de la fase 2 (41 comprobaciones). El código de salida es la cantidad de fallas.
+Las dos suites cargan las escenas reales: el nivel principal y la arena de enemigos. El código de salida es la cantidad de fallas. La suite de enemigos tarda alrededor de un minuto porque espera recorridos de patrulla reales.
+
+## Checklist de la fase 3 (manual, en la arena con F6)
+
+- [ ] El Soldado Corrompido aparece y patrulla entre los cuatro puntos, esperando en cada uno.
+- [ ] Te detecta si entrás en su campo de visión (el texto dice "VE AL JUGADOR" y pasa a `Chase`).
+- [ ] No te detecta detrás del muro central ni por la espalda (salvo muy cerca).
+- [ ] Te persigue rodeando los muros (la línea celeste muestra la ruta).
+- [ ] No atraviesa muros ni obstáculos.
+- [ ] Si te escondés o te alejás corriendo, deja de perseguirte (`Return`) y vuelve a su patrulla.
+- [ ] A distancia corta levanta la espada y ataca, y tu barra de vida baja.
+- [ ] Si esquivás justo cuando baja la espada, aparece "Golpe evitado (invulnerable)".
+- [ ] Tus ataques le bajan la vida (la ves en su etiqueta) y lo aturden.
+- [ ] Al llegar a 0 cae, deja de atacar y a los 6 s desaparece.
+- [ ] El nivel principal (F5) sigue funcionando como en las fases 1 y 2.
+- [ ] No aparecen errores en el panel Salida/Depurador.
 
 ## Checklist de la fase 2 (manual)
 
@@ -163,7 +204,7 @@ Cargan el nivel real y verifican el movimiento de la fase 1 y todo el combate de
 - [ ] Shift aumenta la velocidad (el HUD muestra `Corriendo: si`).
 - [ ] Espacio salta. Los escalones al oeste (`JumpSteps`) requieren saltar.
 - [ ] Al soltar las teclas, el personaje desacelera en lugar de frenar en seco.
-- [ ] El personaje gira suavemente hacia la dirección de movimiento.
+- [ ] El personaje mira hacia donde apunta la cámara: S camina hacia atrás y A/D se desplazan de costado sin darse vuelta.
 - [ ] Choca y se desliza contra paredes, pilares, cajas y el muro en ángulo.
 - [ ] Sube la rampa (al este) hasta la plataforma.
 - [ ] Al acercar la cámara a un pilar o entrar al túnel (sudoeste), la cámara se acorta y no atraviesa la geometría.
@@ -172,7 +213,7 @@ Cargan el nivel real y verifican el movimiento de la fase 1 y todo el combate de
 
 ## Limitaciones conocidas
 
-- **Validación:** la fase 1 se probó en Godot 4.7.2, tanto en el editor como en el build de Windows (AMD Radeon RX 6600, Compatibility). La fase 2 pasa las pruebas automatizadas headless, pero falta probarla jugando.
+- **Validación:** la fase 1 se probó en Godot 4.7.2, tanto en el editor como en el build de Windows (AMD Radeon RX 6600, Compatibility). La fase 2 fue verificada jugando. La fase 3 pasa sus 52 pruebas automatizadas headless, pero falta probarla jugando.
 - **Micro-stutter en monitores de más de 60 Hz:** el personaje se mueve en `_physics_process` (60 Hz) y no está activada la interpolación física. Esto se va a resolver en una fase posterior, cuando se defina el sistema de cámara definitivo.
 - **Sin escalones automáticos:** `CharacterBody3D` no sube escalones por sí solo. Los desniveles de más de unos 10 cm requieren saltar (es intencional en el nivel de prueba).
 - **Gamepad:** el mapeo usa la convención SDL (A = botón inferior). Los mandos no reconocidos pueden tener los ejes cambiados.
@@ -181,3 +222,8 @@ Cargan el nivel real y verifican el movimiento de la fase 1 y todo el combate de
 - **Hitbox rectangular:** el golpe usa una caja frente al personaje durante la ventana activa, no sigue el arco de la espada.
 - **Ataques solo en el suelo:** no hay ataques ni esquivas en el aire.
 - **Trampa de prueba:** existe solo para probar daño e invulnerabilidad; no es contenido final.
+- **Un solo enemigo y sin evasión entre agentes:** la evasión de `NavigationAgent3D` está desactivada. Varios enemigos se empujan físicamente, pero no se esquivan con inteligencia. Conviene activarla cuando haya grupos de enemigos.
+- **El enemigo no reaparece:** el cuerpo desaparece a los 6 s. Las reapariciones (por ejemplo, al descansar) quedan para una fase posterior.
+- **Navmesh generado al cargar:** es ideal para la arena de prueba. En niveles grandes conviene generarlo en el editor y desactivar `bake_on_ready`.
+- **El enemigo no salta ni trepa:** se queda en el borde de cualquier desnivel de más de 25 cm.
+- **El nivel principal no tiene enemigos:** viven en la arena de prueba, porque el nivel principal no tiene región de navegación.

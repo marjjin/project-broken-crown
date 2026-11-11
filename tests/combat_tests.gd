@@ -43,6 +43,7 @@ func _run() -> void:
 	await _test_heavy_attack_consumes_stamina()
 	await _test_heavy_blocked_without_stamina()
 	await _test_actions_blocked_while_committed()
+	await _test_move_while_attacking()
 	await _test_dodge_stamina_and_invulnerability()
 	await _test_dodge_respects_walls()
 	await _test_dummy_dies_and_respawns()
@@ -67,6 +68,21 @@ func _test_movement_still_works() -> void:
 	_check(start.z - _player.global_position.z > 1.0, "W moves the player forward (-Z)")
 	await _seconds(0.4)
 	_check(_player.get_horizontal_speed() < 0.1, "player decelerates to a stop")
+
+	# Camera-facing mode: S walks backwards and A strafes, without turning around.
+	start = _player.global_position
+	Input.action_press(InputActions.MOVE_BACK)
+	await _seconds(0.5)
+	Input.action_release(InputActions.MOVE_BACK)
+	_check(_player.global_position.z - start.z > 1.0, "S moves the player backwards (+Z)")
+	_check(_player.get_facing_direction().dot(Vector3.FORWARD) > 0.99, "and the character keeps facing the camera direction")
+	start = _player.global_position
+	Input.action_press(InputActions.MOVE_LEFT)
+	await _seconds(0.5)
+	Input.action_release(InputActions.MOVE_LEFT)
+	_check(start.x - _player.global_position.x > 1.0, "A strafes left (-X)")
+	_check(_player.get_facing_direction().dot(Vector3.FORWARD) > 0.99, "while still facing forward")
+	await _seconds(0.4)
 
 
 func _test_light_attack_hits_once() -> void:
@@ -143,6 +159,26 @@ func _test_actions_blocked_while_committed() -> void:
 	_actions.request_action(PlayerActionController.Action.DODGE)
 	_check(_actions.get_state() == PlayerActionController.State.LIGHT_ATTACK, "heavy/dodge cannot interrupt a committed light attack")
 	_check(_stamina.get_current() == _stamina.max_stamina, "blocked actions spend no stamina")
+	await _wait_for_locomotion()
+
+
+func _test_move_while_attacking() -> void:
+	print("\n[move while attacking]")
+	await _place_player(Vector3(0, 0.05, 12), Vector3.FORWARD)
+	Input.action_press(InputActions.MOVE_FORWARD)
+	await _seconds(0.3)
+	_actions.request_action(PlayerActionController.Action.LIGHT_ATTACK)
+	var start := _player.global_position
+	await _seconds(0.3) # Still inside the committed part of the swing.
+	_check(_actions.get_state() == PlayerActionController.State.LIGHT_ATTACK, "still attacking")
+	var moved := start.z - _player.global_position.z
+	var expected := _player.settings.walk_speed * _weapon.attack_move_speed_multiplier * 0.3
+	_check(moved > expected * 0.8, "player keeps moving during the swing (%.2f m, expected ~%.2f)" % [moved, expected])
+	Input.action_press(InputActions.JUMP)
+	await _frames(3)
+	Input.action_release(InputActions.JUMP)
+	_check(_player.is_on_floor(), "jumping is blocked during the swing")
+	Input.action_release(InputActions.MOVE_FORWARD)
 	await _wait_for_locomotion()
 
 

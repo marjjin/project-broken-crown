@@ -19,7 +19,14 @@ func play_dodge(_duration: float, _backwards: bool) -> void:
 	pass
 
 
-func play_hit() -> void:
+## Generic three-phase attack (used by enemies): wind up, strike, settle.
+func play_attack(_windup: float, _active: float, _recovery: float) -> void:
+	pass
+
+
+## `interrupting` = false is a hit that does not break the current action
+## (hyper armor / stagger immunity): flash only, keep the pose.
+func play_hit(_interrupting: bool = true) -> void:
 	pass
 
 

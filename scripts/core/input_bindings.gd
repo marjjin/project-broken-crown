@@ -32,6 +32,7 @@ func _enter_tree() -> void:
 	_register(InputActions.ATTACK_LIGHT, [_mouse(MOUSE_BUTTON_LEFT), _button(JOY_BUTTON_RIGHT_SHOULDER)])
 	_register(InputActions.ATTACK_HEAVY, [_mouse(MOUSE_BUTTON_RIGHT), _axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)])
 	_register(InputActions.DODGE, [_key(KEY_CTRL), _button(JOY_BUTTON_B)])
+	_register(InputActions.TOGGLE_ENEMY_DEBUG, [_key(KEY_F3)])
 
 
 func _register(action: StringName, events: Array) -> void:

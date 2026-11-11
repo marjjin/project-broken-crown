@@ -98,8 +98,31 @@ func play_dodge(duration: float, backwards: bool) -> void:
 		tween.tween_callback(func() -> void: rig.rotation = Vector3.ZERO)
 
 
-func play_hit() -> void:
+func play_attack(windup: float, active: float, recovery: float) -> void:
+	var tween := _restart_pose_tween()
+	if tween == null:
+		return
+	# Timings mirror the gameplay windows so the strike is visible when it can hit.
+	tween.set_parallel(true)
+	if weapon_pivot != null:
+		tween.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(120.0), 0.0, deg_to_rad(-20.0)), windup) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(rig, "rotation", Vector3(deg_to_rad(10.0), 0.0, 0.0), windup)
+	tween.chain()
+	if weapon_pivot != null:
+		tween.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-70.0), 0.0, deg_to_rad(20.0)), active) \
+			.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
+	tween.tween_property(rig, "rotation", Vector3(deg_to_rad(-15.0), 0.0, 0.0), active)
+	tween.chain()
+	if weapon_pivot != null:
+		tween.tween_property(weapon_pivot, "rotation", _weapon_rest_rotation, recovery)
+	tween.tween_property(rig, "rotation", Vector3.ZERO, recovery)
+
+
+func play_hit(interrupting: bool = true) -> void:
 	_flash()
+	if not interrupting:
+		return
 	var tween := _restart_pose_tween()
 	if tween == null:
 		return

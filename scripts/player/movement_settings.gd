@@ -12,7 +12,10 @@ extends Resource
 @export_range(0.0, 1.0, 0.05) var air_control: float = 0.35
 
 @export_group("Rotation")
-## Higher values turn the character toward its movement direction faster.
+## true: the character always faces where the camera looks; S walks backwards
+## and A/D strafe. false: the character turns toward its movement direction.
+@export var face_camera_direction: bool = true
+## Higher values turn the character toward its target facing faster.
 @export_range(0.0, 40.0, 0.5) var rotation_speed: float = 12.0
 
 @export_group("Gravity")

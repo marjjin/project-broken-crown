@@ -1,0 +1,117 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/test_environment.tscn" id="1_env"]
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="2_box"]
+[ext_resource type="Material" path="res://resources/materials/grid_ground.tres" id="3_grid"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="4_player"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/corrupted_soldier.tscn" id="5_soldier"]
+[ext_resource type="Script" path="res://scripts/core/mouse_capture_controller.gd" id="6_mouse"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="7_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/combat_hud.tscn" id="8_combat_hud"]
+[ext_resource type="Script" path="res://scripts/level/runtime_navigation_region.gd" id="9_navregion"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_arena"]
+geometry_parsed_geometry_type = 1
+geometry_collision_mask = 1
+agent_height = 2.0
+agent_radius = 0.5
+agent_max_climb = 0.25
+
+[node name="EnemyTestArena" type="Node3D"]
+
+[node name="TestEnvironment" parent="." instance=ExtResource("1_env")]
+
+[node name="Geometry" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_arena")
+script = ExtResource("9_navregion")
+
+[node name="Ground" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(0, -0.5, 0)
+size = Vector3(40, 1, 40)
+surface_material = ExtResource("3_grid")
+
+[node name="WallNorth" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(0, 2, -20.5)
+size = Vector3(42, 4, 1)
+color = Color(0.3, 0.29, 0.3, 1)
+
+[node name="WallSouth" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(0, 2, 20.5)
+size = Vector3(42, 4, 1)
+color = Color(0.3, 0.29, 0.3, 1)
+
+[node name="WallEast" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(20.5, 2, 0)
+size = Vector3(1, 4, 40)
+color = Color(0.3, 0.29, 0.3, 1)
+
+[node name="WallWest" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(-20.5, 2, 0)
+size = Vector3(1, 4, 40)
+color = Color(0.3, 0.29, 0.3, 1)
+
+[node name="CoverWall" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(0, 1.5, 2)
+size = Vector3(10, 3, 0.8)
+color = Color(0.36, 0.33, 0.31, 1)
+
+[node name="CoverWallEast" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(13, 1.5, 6)
+size = Vector3(0.8, 3, 7)
+color = Color(0.36, 0.33, 0.31, 1)
+
+[node name="PillarWest" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(-12, 2, 4)
+size = Vector3(1.2, 4, 1.2)
+
+[node name="PillarEast" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(10, 2, -14)
+size = Vector3(1.2, 4, 1.2)
+
+[node name="Ruins" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(-6, 0.75, 9)
+size = Vector3(2.5, 1.5, 2.5)
+color = Color(0.4, 0.37, 0.33, 1)
+
+[node name="LedgePlatform" parent="Geometry" instance=ExtResource("2_box")]
+position = Vector3(-14, 0.45, -14)
+size = Vector3(3, 0.9, 3)
+color = Color(0.45, 0.38, 0.3, 1)
+
+[node name="PatrolRoute" type="Node3D" parent="."]
+
+[node name="P1" type="Marker3D" parent="PatrolRoute"]
+position = Vector3(-8, 0, -10)
+
+[node name="P2" type="Marker3D" parent="PatrolRoute"]
+position = Vector3(8, 0, -10)
+
+[node name="P3" type="Marker3D" parent="PatrolRoute"]
+position = Vector3(8, 0, -4)
+
+[node name="P4" type="Marker3D" parent="PatrolRoute"]
+position = Vector3(-8, 0, -4)
+
+[node name="CorruptedSoldier" parent="." instance=ExtResource("5_soldier")]
+position = Vector3(-8, 0.1, -10)
+
+[node name="Brain" parent="CorruptedSoldier" node_paths=PackedStringArray("patrol_route")]
+patrol_route = NodePath("../../PatrolRoute")
+
+[node name="DebugView" parent="CorruptedSoldier"]
+show_on_start = true
+log_transitions = true
+
+[node name="Player" parent="." instance=ExtResource("4_player")]
+position = Vector3(0, 0.2, 14)
+
+[node name="MouseCaptureController" type="Node" parent="."]
+script = ExtResource("6_mouse")
+
+[node name="HUD" parent="." node_paths=PackedStringArray("player") instance=ExtResource("7_hud")]
+player = NodePath("../Player")
+
+[node name="CombatHUD" parent="." node_paths=PackedStringArray("health", "stamina", "actions") instance=ExtResource("8_combat_hud")]
+health = NodePath("../Player/HealthComponent")
+stamina = NodePath("../Player/StaminaComponent")
+actions = NodePath("../Player/ActionController")
