@@ -1,0 +1,61 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interaction/door.gd" id="1_door"]
+[ext_resource type="Script" path="res://scripts/interaction/interactable.gd" id="2_interactable"]
+[ext_resource type="PackedScene" path="res://assets/third_party/polyhaven/models/large_castle_door/large_castle_door_1k.gltf" id="3_model"]
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="4_box"]
+[ext_resource type="Material" path="res://resources/materials/crypt_wall.tres" id="5_wall"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_panel"]
+size = Vector3(2, 2.9, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_reach"]
+size = Vector3(3.2, 3, 3.4)
+
+[node name="CryptDoor" type="Node3D" node_paths=PackedStringArray("interactable", "hinge", "panel", "navigation_link", "visual_model")]
+script = ExtResource("1_door")
+interactable = NodePath("Interactable")
+hinge = NodePath("Hinge")
+panel = NodePath("Panel")
+navigation_link = NodePath("NavigationLink3D")
+visual_model = NodePath("Model")
+leaf_names = PackedStringArray("large_castle_door_left", "large_castle_door_right")
+leaf_angle_signs = PackedFloat32Array(1, -1)
+
+[node name="Model" parent="." instance=ExtResource("3_model")]
+
+[node name="JambLeft" parent="." instance=ExtResource("4_box")]
+position = Vector3(-1.25, 1.5, 0)
+size = Vector3(0.5, 3, 1)
+surface_material = ExtResource("5_wall")
+
+[node name="JambRight" parent="." instance=ExtResource("4_box")]
+position = Vector3(1.25, 1.5, 0)
+size = Vector3(0.5, 3, 1)
+surface_material = ExtResource("5_wall")
+
+[node name="Hinge" type="Marker3D" parent="."]
+position = Vector3(-1, 0, 0)
+
+[node name="Panel" type="AnimatableBody3D" parent="."]
+position = Vector3(0, 1.45, 0)
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Panel"]
+shape = SubResource("BoxShape3D_panel")
+
+[node name="Interactable" type="Area3D" parent="."]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_interactable")
+prompt = "Abrir"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactable"]
+position = Vector3(0, 1.5, 0)
+shape = SubResource("BoxShape3D_reach")
+
+[node name="NavigationLink3D" type="NavigationLink3D" parent="."]
+enabled = false
+start_position = Vector3(0, 0, 1.6)
+end_position = Vector3(0, 0, -1.6)

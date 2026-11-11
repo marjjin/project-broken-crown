@@ -1,0 +1,105 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interaction/checkpoint.gd" id="1_checkpoint"]
+[ext_resource type="Script" path="res://scripts/interaction/interactable.gd" id="2_interactable"]
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="3_box"]
+[ext_resource type="Material" path="res://resources/materials/statue_stone.tres" id="4_stone"]
+[ext_resource type="Material" path="res://resources/materials/flame.tres" id="5_flame"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+material = ExtResource("4_stone")
+radius = 0.5
+height = 2.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_helmet"]
+material = ExtResource("4_stone")
+size = Vector3(0.6, 0.55, 0.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pauldron"]
+material = ExtResource("4_stone")
+size = Vector3(1.5, 0.3, 0.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_blade"]
+material = ExtResource("4_stone")
+size = Vector3(0.14, 1.9, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_guard"]
+material = ExtResource("4_stone")
+size = Vector3(0.6, 0.1, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_shield"]
+material = ExtResource("4_stone")
+size = Vector3(0.9, 1.2, 0.12)
+
+[sub_resource type="SphereMesh" id="SphereMesh_flame"]
+material = ExtResource("5_flame")
+radius = 0.14
+height = 0.36
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_reach"]
+size = Vector3(3, 2.4, 2.6)
+
+[node name="GuardStatue" type="Node3D" node_paths=PackedStringArray("interactable", "spawn_point", "light", "active_indicator")]
+script = ExtResource("1_checkpoint")
+checkpoint_id = &"checkpoint"
+interactable = NodePath("Interactable")
+spawn_point = NodePath("SpawnPoint")
+light = NodePath("StatueLight")
+active_indicator = NodePath("Flame")
+
+[node name="Pedestal" parent="." instance=ExtResource("3_box")]
+position = Vector3(0, 0.5, 0)
+size = Vector3(2, 1, 2)
+surface_material = ExtResource("4_stone")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.2, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Helmet" type="MeshInstance3D" parent="."]
+position = Vector3(0, 3.55, 0)
+mesh = SubResource("BoxMesh_helmet")
+
+[node name="Pauldrons" type="MeshInstance3D" parent="."]
+position = Vector3(0, 3.05, 0)
+mesh = SubResource("BoxMesh_pauldron")
+
+[node name="Blade" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.95, 0.62)
+mesh = SubResource("BoxMesh_blade")
+
+[node name="Crossguard" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.85, 0.62)
+mesh = SubResource("BoxMesh_guard")
+
+[node name="Shield" type="MeshInstance3D" parent="."]
+position = Vector3(-0.6, 2.1, 0.25)
+rotation = Vector3(0, 0.4, 0.1)
+mesh = SubResource("BoxMesh_shield")
+
+[node name="Flame" type="MeshInstance3D" parent="."]
+visible = false
+position = Vector3(0, 1.12, 0.75)
+mesh = SubResource("SphereMesh_flame")
+
+[node name="StatueLight" type="OmniLight3D" parent="."]
+position = Vector3(0, 2.4, 1.6)
+light_color = Color(0.55, 0.65, 0.9, 1)
+light_energy = 0.5
+shadow_enabled = true
+omni_range = 9.0
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+position = Vector3(0, 0.1, 2.2)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="Interactable" type="Area3D" parent="."]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_interactable")
+prompt = "Descansar"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactable"]
+position = Vector3(0, 1.2, 1.6)
+shape = SubResource("BoxShape3D_reach")

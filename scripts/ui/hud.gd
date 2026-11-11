@@ -9,6 +9,9 @@ const REFRESH_INTERVAL := 0.25
 @export var instructions_label: Label
 @export var status_label: Label
 @export var capture_hint: Control
+## Panel holding controls + status; F1 shows/hides it.
+@export var help_panel: Control
+@export var help_visible_on_start: bool = true
 
 var _refresh_timer := 0.0
 var _platform_name := ""
@@ -28,7 +31,14 @@ func _ready() -> void:
 		ProjectSettings.get_setting("rendering/renderer/rendering_method", "?"),
 		RenderingServer.get_video_adapter_name()]
 	instructions_label.text = _build_instructions()
+	if help_panel != null:
+		help_panel.visible = help_visible_on_start
 	_refresh_status()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if help_panel != null and event.is_action_pressed(InputActions.TOGGLE_HELP):
+		help_panel.visible = not help_panel.visible
 
 
 func _process(delta: float) -> void:
@@ -50,7 +60,9 @@ func _build_instructions() -> String:
 		"Clic izq. / RB - Ataque ligero (combo x3)",
 		"Clic der. / RT - Ataque fuerte (stamina)",
 		"Ctrl / B - Esquiva (stamina)",
+		"E / X - Interactuar",
 		"Esc - Liberar mouse   |   Clic - Capturar",
+		"F1 - Mostrar/ocultar esta ayuda",
 	])
 
 

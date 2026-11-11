@@ -1,0 +1,21 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_stone"]
+frequency = 0.12
+
+[sub_resource type="Gradient" id="Gradient_stone"]
+colors = PackedColorArray(0.62, 0.62, 0.62, 1, 1, 1, 1, 1)
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_stone"]
+width = 256
+height = 256
+seamless = true
+color_ramp = SubResource("Gradient_stone")
+noise = SubResource("FastNoiseLite_stone")
+
+[resource]
+albedo_color = Color(0.5, 0.5, 0.47, 1)
+albedo_texture = SubResource("NoiseTexture2D_stone")
+roughness = 0.8
+uv1_scale = Vector3(0.35, 0.35, 0.35)
+uv1_triplanar = true

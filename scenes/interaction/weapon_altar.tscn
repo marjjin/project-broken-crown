@@ -1,0 +1,55 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interaction/inscription.gd" id="1_inscription"]
+[ext_resource type="Script" path="res://scripts/interaction/interactable.gd" id="2_interactable"]
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="3_box"]
+[ext_resource type="Material" path="res://resources/materials/statue_stone.tres" id="4_stone"]
+[ext_resource type="Material" path="res://resources/materials/dark_iron.tres" id="5_iron"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_rack"]
+material = ExtResource("5_iron")
+size = Vector3(0.08, 1.4, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_crossbar"]
+material = ExtResource("5_iron")
+size = Vector3(1.2, 0.08, 0.08)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_reach"]
+size = Vector3(2.4, 2.2, 2.4)
+
+[node name="WeaponAltar" type="Node3D" node_paths=PackedStringArray("interactable")]
+script = ExtResource("1_inscription")
+interactable = NodePath("Interactable")
+title = "Altar de armas"
+text = "Un soporte vacío con el emblema de la Guardia Real. Alguna vez sostuvo un arma digna de un capitán."
+
+[node name="Altar" parent="." instance=ExtResource("3_box")]
+position = Vector3(0, 0.55, 0)
+size = Vector3(1.6, 1.1, 0.9)
+surface_material = ExtResource("4_stone")
+
+[node name="RackLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-0.55, 1.8, -0.2)
+mesh = SubResource("BoxMesh_rack")
+
+[node name="RackRight" type="MeshInstance3D" parent="."]
+position = Vector3(0.55, 1.8, -0.2)
+mesh = SubResource("BoxMesh_rack")
+
+[node name="Crossbar" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.2, -0.2)
+mesh = SubResource("BoxMesh_crossbar")
+
+[node name="WeaponMount" type="Marker3D" parent="."]
+position = Vector3(0, 1.8, -0.1)
+
+[node name="Interactable" type="Area3D" parent="."]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_interactable")
+prompt = "Examinar"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactable"]
+position = Vector3(0, 1.1, 1)
+shape = SubResource("BoxShape3D_reach")

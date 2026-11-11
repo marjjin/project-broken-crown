@@ -1,0 +1,114 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/crypt_room.tscn" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="2_box"]
+[ext_resource type="Material" path="res://resources/materials/crypt_floor.tres" id="3_floor"]
+[ext_resource type="Material" path="res://resources/materials/crypt_wall.tres" id="4_wall"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/wall_torch.tscn" id="p_torch"]
+
+[ext_resource type="Script" path="res://scripts/levels/level_exit.gd" id="l_exit"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_exit"]
+size = Vector3(15, 3, 6)
+
+[node name="SectorF_TombExit" type="Node3D"]
+
+[node name="AscendingCorridor" parent="." instance=ExtResource("1_room")]
+position = Vector3(17, 0, -101)
+inner_size = Vector2(3, 14)
+height = 8.0
+openings = Array[Vector3]([Vector3(0, 0, 3), Vector3(1, 0, 3)])
+
+[node name="Ramp" parent="." instance=ExtResource("2_box")]
+position = Vector3(17, 1.304, -101)
+rotation = Vector3(0.211093, 0, 0)
+size = Vector3(3, 0.4, 14.318)
+surface_material = ExtResource("3_floor")
+
+[node name="Terrace" parent="." instance=ExtResource("2_box")]
+position = Vector3(17, 1.5, -115)
+size = Vector3(18, 3, 14)
+surface_material = ExtResource("3_floor")
+
+[node name="ParapetNorth" parent="." instance=ExtResource("2_box")]
+position = Vector3(17, 3.5, -121.5)
+size = Vector3(18, 1, 1)
+surface_material = ExtResource("4_wall")
+
+[node name="ParapetWest" parent="." instance=ExtResource("2_box")]
+position = Vector3(8.5, 3.5, -115)
+size = Vector3(1, 1, 12)
+surface_material = ExtResource("4_wall")
+
+[node name="ParapetEast" parent="." instance=ExtResource("2_box")]
+position = Vector3(25.5, 3.5, -115)
+size = Vector3(1, 1, 12)
+surface_material = ExtResource("4_wall")
+
+[node name="ParapetSouthWest" parent="." instance=ExtResource("2_box")]
+position = Vector3(11.5, 3.5, -108.5)
+size = Vector3(6, 1, 1)
+surface_material = ExtResource("4_wall")
+
+[node name="ParapetSouthEast" parent="." instance=ExtResource("2_box")]
+position = Vector3(22.5, 3.5, -108.5)
+size = Vector3(6, 1, 1)
+surface_material = ExtResource("4_wall")
+
+[node name="Bounds" type="Node3D" parent="."]
+
+[node name="InvisibleNorth" parent="Bounds" instance=ExtResource("2_box")]
+position = Vector3(17, 7, -121.5)
+size = Vector3(18, 7, 1)
+mesh_visible = false
+
+[node name="InvisibleWest" parent="Bounds" instance=ExtResource("2_box")]
+position = Vector3(8.5, 7, -115)
+size = Vector3(1, 7, 14)
+mesh_visible = false
+
+[node name="InvisibleEast" parent="Bounds" instance=ExtResource("2_box")]
+position = Vector3(25.5, 7, -115)
+size = Vector3(1, 7, 14)
+mesh_visible = false
+
+[node name="InvisibleSouthWest" parent="Bounds" instance=ExtResource("2_box")]
+position = Vector3(11.5, 7, -108.5)
+size = Vector3(6, 7, 1)
+mesh_visible = false
+
+[node name="InvisibleSouthEast" parent="Bounds" instance=ExtResource("2_box")]
+position = Vector3(22.5, 7, -108.5)
+size = Vector3(6, 7, 1)
+mesh_visible = false
+
+[node name="ExitSpot" type="Marker3D" parent="."]
+position = Vector3(17, 3, -117)
+
+[node name="TorchRampLow" parent="." instance=ExtResource("p_torch")]
+position = Vector3(15.5, 0.6, -97)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="TorchRampHigh" parent="." instance=ExtResource("p_torch")]
+position = Vector3(18.5, 2.1, -104)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="MoonSpill" type="OmniLight3D" parent="."]
+position = Vector3(17, 6, -107)
+light_color = Color(0.6, 0.68, 0.95, 1)
+light_energy = 1.2
+omni_range = 11.0
+
+[node name="LevelExit" type="Area3D" parent="."]
+position = Vector3(17, 4.5, -117)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("l_exit")
+level_id = &"the_awakening"
+title = "El Despertar — Fin"
+message = "Más allá de la colina humean las ruinas de la aldea que juraste proteger. La Aldea Devastada te espera. (Fin del nivel provisional)"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LevelExit"]
+shape = SubResource("BoxShape3D_exit")

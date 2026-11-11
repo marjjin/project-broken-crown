@@ -11,6 +11,10 @@
 [ext_resource type="Script" path="res://scripts/player/player_action_controller.gd" id="9_actions"]
 [ext_resource type="Resource" path="res://resources/weapons/royal_guard_sword.tres" id="10_sword"]
 [ext_resource type="Resource" path="res://resources/player/default_action_settings.tres" id="11_action_settings"]
+[ext_resource type="Script" path="res://scripts/interaction/player_interactor.gd" id="12_interactor"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_interact"]
+radius = 1.6
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -140,6 +144,19 @@ hitbox = NodePath("../Visual/AttackHitbox")
 animator = NodePath("../ActionAnimator")
 weapon = ExtResource("10_sword")
 settings = ExtResource("11_action_settings")
+
+[node name="Interactor" type="Area3D" parent="." node_paths=PackedStringArray("player", "health", "actions")]
+collision_layer = 0
+collision_mask = 32
+monitorable = false
+script = ExtResource("12_interactor")
+player = NodePath("..")
+health = NodePath("../HealthComponent")
+actions = NodePath("../ActionController")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactor"]
+position = Vector3(0, 1, 0)
+shape = SubResource("SphereShape3D_interact")
 
 [node name="CameraRig" parent="." instance=ExtResource("3_camera_rig")]
 position = Vector3(0, 1.5, 0)

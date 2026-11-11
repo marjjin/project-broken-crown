@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/level/crypt_room.gd" id="1_room"]
+[ext_resource type="Material" path="res://resources/materials/crypt_floor.tres" id="2_floor"]
+[ext_resource type="Material" path="res://resources/materials/crypt_wall.tres" id="3_wall"]
+[ext_resource type="Material" path="res://resources/materials/crypt_ceiling.tres" id="4_ceiling"]
+
+[node name="CryptRoom" type="Node3D"]
+script = ExtResource("1_room")
+floor_material = ExtResource("2_floor")
+wall_material = ExtResource("3_wall")
+ceiling_material = ExtResource("4_ceiling")

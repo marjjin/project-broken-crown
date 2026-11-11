@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/level_controller.gd" id="1_level"]
+[ext_resource type="PackedScene" path="res://scenes/levels/the_awakening/awakening_environment.tscn" id="2_env"]
+[ext_resource type="Script" path="res://scripts/level/runtime_navigation_region.gd" id="3_navregion"]
+[ext_resource type="PackedScene" path="res://scenes/levels/the_awakening/sector_a_burial_chamber.tscn" id="4_a"]
+[ext_resource type="PackedScene" path="res://scenes/levels/the_awakening/sector_b_crypt_halls.tscn" id="5_b"]
+[ext_resource type="PackedScene" path="res://scenes/levels/the_awakening/sector_c_guard_hall.tscn" id="6_c"]
+[ext_resource type="PackedScene" path="res://scenes/levels/the_awakening/sector_d_catacombs.tscn" id="7_d"]
+[ext_resource type="PackedScene" path="res://scenes/levels/the_awakening/sector_e_guardian_chamber.tscn" id="8_e"]
+[ext_resource type="PackedScene" path="res://scenes/levels/the_awakening/sector_f_tomb_exit.tscn" id="9_f"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="10_player"]
+[ext_resource type="Script" path="res://scripts/core/mouse_capture_controller.gd" id="11_mouse"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="12_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/combat_hud.tscn" id="13_combat_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/level_hud.tscn" id="14_level_hud"]
+[ext_resource type="PackedScene" path="res://scenes/levels/the_awakening/devastated_village_vista.tscn" id="15_vista"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_crypt"]
+geometry_parsed_geometry_type = 1
+geometry_collision_mask = 1
+agent_height = 2.0
+agent_radius = 0.5
+agent_max_climb = 0.25
+filter_baking_aabb = AABB(-100, -1, -160, 200, 1.85, 220)
+
+[node name="TheAwakening" type="Node3D" node_paths=PackedStringArray("player", "player_start")]
+script = ExtResource("1_level")
+level_id = &"the_awakening"
+display_name = "El Despertar"
+intro_text = "Despertás en tu propia tumba. La Corona que juraste proteger te enterró aquí.
+(F1: controles)"
+player = NodePath("Player")
+player_start = NodePath("Crypt/SectorA/PlayerStart")
+
+[node name="Environment" parent="." instance=ExtResource("2_env")]
+
+[node name="Crypt" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_crypt")
+script = ExtResource("3_navregion")
+
+[node name="SectorA" parent="Crypt" instance=ExtResource("4_a")]
+
+[node name="SectorB" parent="Crypt" instance=ExtResource("5_b")]
+
+[node name="SectorC" parent="Crypt" instance=ExtResource("6_c")]
+
+[node name="SectorD" parent="Crypt" instance=ExtResource("7_d")]
+
+[node name="SectorE" parent="Crypt" instance=ExtResource("8_e")]
+
+[node name="SectorF" parent="Crypt" instance=ExtResource("9_f")]
+
+[node name="DevastatedVillageVista" parent="." instance=ExtResource("15_vista")]
+
+[node name="Player" parent="." instance=ExtResource("10_player")]
+
+[node name="MouseCaptureController" type="Node" parent="."]
+script = ExtResource("11_mouse")
+
+[node name="HUD" parent="." node_paths=PackedStringArray("player") instance=ExtResource("12_hud")]
+player = NodePath("../Player")
+help_visible_on_start = false
+
+[node name="LevelHUD" parent="." node_paths=PackedStringArray("interactor") instance=ExtResource("14_level_hud")]
+interactor = NodePath("../Player/Interactor")
+
+[node name="CombatHUD" parent="." node_paths=PackedStringArray("health", "stamina", "actions") instance=ExtResource("13_combat_hud")]
+health = NodePath("../Player/HealthComponent")
+stamina = NodePath("../Player/StaminaComponent")
+actions = NodePath("../Player/ActionController")

@@ -83,6 +83,7 @@ El objetivo se busca por el **grupo `player`**, no por rutas de escena. Si no ha
 - `RuntimeNavigationRegion` (`scripts/level/runtime_navigation_region.gd`) genera el navmesh **al cargar el nivel** a partir de los `StaticBody3D` hijos (capa `world`). Si la generación no produce polígonos, lo reporta como error.
 - `EnemyNavigator` solo pide una ruta nueva si el destino se movió más de `repath_distance` (0,75 m), y como máximo cada `repath_interval` (0,3 s). Un destino completamente nuevo se aplica al instante.
 - Movimiento: el cerebro toma la dirección del siguiente punto de la ruta y se la pasa a `EnemyCharacter`, que sigue usando gravedad y `move_and_slide`. **No atraviesa paredes:** la ruta las rodea y la física lo impide igual.
+- **Vigilante de progreso:** si hacia un destino fijo no se acerca al menos 10 cm en 1 s (por ejemplo, empujando un pilar junto a un punto que quedó fuera del navmesh), ese tiempo también cuenta como inalcanzable. Con destinos que se mueven, como un jugador perseguido, se reinicia.
 - **Destinos inalcanzables:** el tiempo sin progreso se acumula en `_unreachable_time`. Pasado `unreachable_give_up_time`, el enemigo salta el punto de patrulla, abandona la persecución o se queda en el lugar si no puede volver a casa. Nunca se bloquea.
 
 > Detalle técnico: el navmesh queda unos 0,5 m sobre el suelo por la cuantización en celdas, y `NavigationAgent3D` mide la distancia en 3D. Por eso `path_desired_distance` y `target_desired_distance` valen 1,0 m. La llegada real la mide el cerebro en plano horizontal con `arrival_tolerance`, y el último tramo se recorre en línea recta.
@@ -149,7 +150,7 @@ CHASE: jugador visible, a ≤ attack_range, mirándolo (±25°), sin cooldown
 
 ## Pruebas automatizadas
 
-`tests/enemy_tests.gd` carga la arena real y verifica 52 condiciones, organizadas en tres etapas:
+`tests/enemy_tests.gd` carga la arena real y verifica 53 condiciones, organizadas en tres etapas:
 
 1. **Patrullaje y detección:** aparición, patrulla en orden, campo de visión, paredes, espalda, proximidad y ausencia de ruta.
 2. **Persecución y navegación:** rodear paredes, persecución hasta el alcance, abandono estable sin parpadeos, regreso a la ruta y objetivo inalcanzable.

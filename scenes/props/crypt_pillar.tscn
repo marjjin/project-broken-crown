@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="1_box"]
+[ext_resource type="Material" path="res://resources/materials/crypt_wall.tres" id="2_wall"]
+
+[node name="CryptPillar" type="Node3D"]
+
+[node name="Shaft" parent="." instance=ExtResource("1_box")]
+position = Vector3(0, 2, 0)
+size = Vector3(1.1, 4, 1.1)
+surface_material = ExtResource("2_wall")
+
+[node name="Capital" parent="." instance=ExtResource("1_box")]
+position = Vector3(0, 3.8, 0)
+size = Vector3(1.5, 0.4, 1.5)
+surface_material = ExtResource("2_wall")

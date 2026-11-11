@@ -1,0 +1,101 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/crypt_room.tscn" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/props/crypt_pillar.tscn" id="2_pillar"]
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="3_box"]
+[ext_resource type="Material" path="res://resources/materials/crypt_wall.tres" id="4_wall"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/inscription_tablet.tscn" id="d_tablet"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/wall_torch.tscn" id="p_torch"]
+
+[ext_resource type="PackedScene" path="res://scenes/enemies/corrupted_soldier.tscn" id="e_soldier"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/guard_remains.tscn" id="a_remains"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/rubble_pile.tscn" id="a_rubble"]
+
+[node name="SectorB_CryptHalls" type="Node3D"]
+
+[node name="CorridorB1" parent="." instance=ExtResource("1_room")]
+position = Vector3(0, 0, -10.5)
+inner_size = Vector2(3, 7)
+openings = Array[Vector3]([Vector3(0, 0, 3), Vector3(1, 0, 3)])
+
+[node name="HallB2" parent="." instance=ExtResource("1_room")]
+position = Vector3(0, 0, -21)
+inner_size = Vector2(10, 12)
+openings = Array[Vector3]([Vector3(1, 0, 3), Vector3(0, 0, 3)])
+
+[node name="CorridorB3" parent="." instance=ExtResource("1_room")]
+position = Vector3(0, 0, -30)
+inner_size = Vector2(3, 4)
+openings = Array[Vector3]([Vector3(0, 0, 3), Vector3(1, 0, 3)])
+
+[node name="PillarNW" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(-2.8, 0, -25)
+
+[node name="PillarNE" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(2.8, 0, -25)
+
+[node name="PillarSW" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(-2.8, 0, -17)
+
+[node name="PillarSE" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(2.8, 0, -17)
+
+[node name="Rubble" parent="." instance=ExtResource("3_box")]
+position = Vector3(3.9, 0.6, -21)
+rotation = Vector3(0, 0.4, 0)
+size = Vector3(1.4, 1.2, 1)
+surface_material = ExtResource("4_wall")
+
+[node name="PatrolRoute" type="Node3D" parent="."]
+
+[node name="P1" type="Marker3D" parent="PatrolRoute"]
+position = Vector3(-1.3, 0, -15.8)
+
+[node name="P2" type="Marker3D" parent="PatrolRoute"]
+position = Vector3(1.3, 0, -15.8)
+
+[node name="P3" type="Marker3D" parent="PatrolRoute"]
+position = Vector3(1.3, 0, -26.2)
+
+[node name="P4" type="Marker3D" parent="PatrolRoute"]
+position = Vector3(-1.3, 0, -26.2)
+
+[node name="OathInscription" parent="." instance=ExtResource("d_tablet")]
+position = Vector3(-4.85, 0, -21)
+rotation = Vector3(0, 1.5708, 0)
+title = "Juramento grabado"
+text = "«Mientras viva el rey, viva la Guardia.» Nadie imaginó cuánto viviría el rey."
+
+[node name="TorchCorridor" parent="." instance=ExtResource("p_torch")]
+position = Vector3(-1.5, 0, -10.5)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="TorchHallWest" parent="." instance=ExtResource("p_torch")]
+position = Vector3(-5, 0, -17)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="TorchHallEast" parent="." instance=ExtResource("p_torch")]
+position = Vector3(5, 0, -25)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="TorchHallNorth" parent="." instance=ExtResource("p_torch")]
+position = Vector3(2.2, 0, -27)
+rotation = Vector3(0, 0, 0)
+
+[node name="CorruptedSoldier" parent="." instance=ExtResource("e_soldier")]
+position = Vector3(-1.3, 0.1, -15.8)
+
+[node name="Brain" parent="CorruptedSoldier" node_paths=PackedStringArray("patrol_route")]
+patrol_route = NodePath("../../PatrolRoute")
+
+[node name="RubbleOnCollapse" parent="." instance=ExtResource("a_rubble")]
+position = Vector3(3.6, 1.2, -21)
+rotation = Vector3(0, 0.5, 0)
+
+[node name="FallenGuard" parent="." instance=ExtResource("a_remains")]
+position = Vector3(-4.2, 0, -25.9)
+rotation = Vector3(0, 0.8, 0)

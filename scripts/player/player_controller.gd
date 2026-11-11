@@ -20,8 +20,12 @@ const FALL_RESET_HEIGHT := -25.0
 ## Visual-only node rotated toward the movement direction.
 @export var visual_root: Node3D
 
+signal respawned
+
 var _sprinting := false
-var _spawn_transform: Transform3D
+var _spawn_position := Vector3.ZERO
+## Facing (yaw, radians) applied to the model and camera on respawn; NAN keeps the current one.
+var _spawn_yaw := NAN
 var _input_enabled := true
 var _jump_allowed := true
 var _speed_multiplier := 1.0
@@ -40,7 +44,7 @@ func _ready() -> void:
 		push_error("PlayerController: 'orientation_reference' is not assigned; movement falls back to world axes.")
 	if visual_root == null:
 		push_warning("PlayerController: 'visual_root' is not assigned; the character will not turn visually.")
-	_spawn_transform = global_transform
+	_spawn_position = global_position
 
 
 func _physics_process(delta: float) -> void:
@@ -121,10 +125,29 @@ func face_toward(direction: Vector3) -> void:
 	visual_root.rotation.y = atan2(-direction.x, -direction.z)
 
 
+## Where respawn() puts the player (level start, checkpoints). Only the
+## position and yaw of `point` are used: the body itself never rotates.
+func set_spawn_point(point: Transform3D) -> void:
+	_spawn_position = point.origin
+	var forward := -point.basis.z
+	_spawn_yaw = atan2(-forward.x, -forward.z) if Vector2(forward.x, forward.z).length_squared() > 0.0001 else NAN
+
+
+func get_spawn_position() -> Vector3:
+	return _spawn_position
+
+
 func respawn() -> void:
-	global_transform = _spawn_transform
+	global_position = _spawn_position
 	velocity = Vector3.ZERO
 	clear_horizontal_override()
+	if not is_nan(_spawn_yaw):
+		if visual_root != null:
+			visual_root.rotation.y = _spawn_yaw
+		# Look the same way as the character, so the camera is behind it.
+		if is_instance_valid(orientation_reference):
+			orientation_reference.global_rotation.y = _spawn_yaw
+	respawned.emit()
 
 
 func get_horizontal_speed() -> float:

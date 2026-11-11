@@ -1,0 +1,76 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/crypt_room.tscn" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/props/crypt_pillar.tscn" id="2_pillar"]
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="3_box"]
+[ext_resource type="Material" path="res://resources/materials/statue_stone.tres" id="4_stone"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/crypt_door.tscn" id="d_door"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/inscription_tablet.tscn" id="d_tablet"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/wall_torch.tscn" id="p_torch"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/guard_remains.tscn" id="a_remains"]
+
+[node name="SectorA_BurialChamber" type="Node3D"]
+
+[node name="Chamber" parent="." instance=ExtResource("1_room")]
+inner_size = Vector2(12, 12)
+openings = Array[Vector3]([Vector3(0, 0, 3)])
+
+[node name="Sarcophagus" type="Node3D" parent="."]
+
+[node name="Base" parent="Sarcophagus" instance=ExtResource("3_box")]
+position = Vector3(0, 0.45, 0)
+size = Vector3(1.6, 0.9, 2.8)
+surface_material = ExtResource("4_stone")
+
+[node name="Lid" parent="Sarcophagus" instance=ExtResource("3_box")]
+position = Vector3(0.35, 1.05, 0.2)
+rotation = Vector3(0, 0.2, 0)
+size = Vector3(1.8, 0.3, 3)
+surface_material = ExtResource("4_stone")
+
+[node name="PillarNW" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(-4, 0, -4)
+
+[node name="PillarNE" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(4, 0, -4)
+
+[node name="PillarSW" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(-4, 0, 4)
+
+[node name="PillarSE" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(4, 0, 4)
+
+[node name="PlayerStart" type="Marker3D" parent="."]
+position = Vector3(0, 0.1, 3)
+
+[node name="ChamberDoor" parent="." instance=ExtResource("d_door")]
+position = Vector3(0, 0, -6.5)
+
+[node name="TombInscription" parent="." instance=ExtResource("d_tablet")]
+position = Vector3(0, 0, 1.5)
+title = "Lápida"
+text = "Aquí yace un juramentado de la Guardia Real. Sirvió a la Corona hasta que la Corona lo traicionó."
+
+[node name="TorchDoorWest" parent="." instance=ExtResource("p_torch")]
+position = Vector3(-2.6, 0, -6)
+rotation = Vector3(0, 0, 0)
+
+[node name="TorchDoorEast" parent="." instance=ExtResource("p_torch")]
+position = Vector3(2.6, 0, -6)
+rotation = Vector3(0, 0, 0)
+
+[node name="TorchSouthWest" parent="." instance=ExtResource("p_torch")]
+position = Vector3(-3, 0, 6)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="TorchSouthEast" parent="." instance=ExtResource("p_torch")]
+position = Vector3(3, 0, 6)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="OwnArms" parent="." instance=ExtResource("a_remains")]
+position = Vector3(-1.25, 0, -0.3)
+rotation = Vector3(0, 1.5708, 0)

@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/third_party/polyhaven/models/rock_07/rock_07_1k.gltf" id="1_rock"]
+
+[node name="RubblePile" type="Node3D"]
+
+[node name="RockA" parent="." instance=ExtResource("1_rock")]
+transform = Transform3D(4.5, 0, 0, 0, 4.5, 0, 0, 0, 4.5, 0, 0, 0)
+
+[node name="RockB" parent="." instance=ExtResource("1_rock")]
+transform = Transform3D(0, 0, -3.5, 0, 3.5, 0, 3.5, 0, 0, 0.6, 0, 0.5)
+
+[node name="RockC" parent="." instance=ExtResource("1_rock")]
+transform = Transform3D(-2.5, 0, 0, 0, 2.2, 0, 0, 0, -2.5, -0.55, 0, 0.35)
+
+[node name="RockD" parent="." instance=ExtResource("1_rock")]
+transform = Transform3D(0, 0, 3, 0, 3, 0, -3, 0, 0, 0.2, 0.55, -0.2)

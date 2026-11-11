@@ -1,12 +1,26 @@
 # Project Broken Crown
 
-RPG de acción 3D en tercera persona, ambientado en un mundo medieval de fantasía oscura.
+RPG de acción 3D en tercera persona, ambientado en un mundo medieval de fantasía oscura. Un antiguo miembro de la Guardia Real despierta en su propia tumba más de cien años después de haber sido traicionado por el rey.
 
 **Plataforma objetivo: escritorio (Windows; Steam a futuro).** La versión web quedó descartada.
 
-**Fase actual: 3 — IA de enemigos.** El **Soldado Corrompido** patrulla, detecta al jugador por vista (con paredes que bloquean), lo persigue con navegación 3D, ataca, recibe daño y muere. Se suma al combate de la fase 2 (espada, combo, ataque fuerte, esquiva, vida y stamina). Todavía no hay jefes, inventario, misiones ni persistencia.
+**Fase actual: 4 — Primer nivel, "El Despertar".** Es un nivel 3D explorable de seis sectores: cripta, catacumbas, cámara del Guardián y salida al exterior con vista a la Aldea Devastada. Incluye puertas, inscripciones, un coleccionable, una ruta secundaria, el checkpoint de la estatua de la Guardia Real, cuatro Soldados Corrompidos y ambientación con Forward+.
 
-Documentación técnica: [docs/COMBAT.md](docs/COMBAT.md) (combate) · [docs/ENEMIES.md](docs/ENEMIES.md) (enemigos e IA).
+Se apoya en las fases anteriores:
+- **Fase 1:** movimiento y cámara.
+- **Fase 2:** combate, con espada, combo, ataque fuerte, esquiva, vida y stamina.
+- **Fase 3:** IA de enemigos.
+
+**Recursos 3D:** las paredes, los pisos y los techos usan texturas PBR, y el nivel incluye puertas dobles, una reja, braseros, escudos, estoques y rocas reales. Todo proviene de Poly Haven bajo licencia CC0 (ver [docs/ASSET_LICENSES.md](docs/ASSET_LICENSES.md)).
+
+Todavía no hay miniboss, inventario, misiones ni guardado en disco.
+
+Documentación técnica:
+- [docs/COMBAT.md](docs/COMBAT.md): combate.
+- [docs/ENEMIES.md](docs/ENEMIES.md): enemigos e IA.
+- [docs/LEVEL_THE_AWAKENING.md](docs/LEVEL_THE_AWAKENING.md): el nivel.
+- [docs/INTERACTION.md](docs/INTERACTION.md): interacción, puertas, checkpoint y sesión.
+- [docs/ASSET_LICENSES.md](docs/ASSET_LICENSES.md): recursos externos (CC0) y sus licencias.
 
 ---
 
@@ -15,7 +29,7 @@ Documentación técnica: [docs/COMBAT.md](docs/COMBAT.md) (combate) · [docs/ENE
 | Requisito | Detalle |
 |---|---|
 | Motor | **Godot 4.7.2 stable**, edición estándar (GDScript, *no* la edición .NET/C#) |
-| Versión mínima esperada | Godot 4.4 (el código usa API estable desde 4.3; no se probó en versiones anteriores) |
+| GPU | Compatible con **Vulkan** o **Direct3D 12** (renderizador Forward+) |
 | Plantillas de exportación | Solo para generar el `.exe`: plantilla **Windows x86_64** |
 | Plugins externos | Ninguno |
 
@@ -24,15 +38,10 @@ Descarga oficial de Godot: <https://godotengine.org/download>
 ## Abrir y ejecutar
 
 1. Abrí Godot y en el Project Manager elegí **Import** → seleccioná el archivo `project.godot` de esta carpeta.
-2. La primera apertura reimporta los recursos (se crea la carpeta `.godot/`, que no se versiona).
-3. Presioná **F5** (Run Project). La escena principal es `res://scenes/main/main.tscn`.
-
-Desde la línea de comandos:
-
-```bash
-godot --path . # abre el juego directamente
-godot --path . -e # abre el editor
-```
+2. Presioná **F5**. La escena principal es **El Despertar** (`res://scenes/levels/the_awakening/the_awakening.tscn`).
+3. Otras escenas, abriéndolas y presionando **F6**:
+   - `scenes/main/main.tscn`: campo de pruebas de movimiento y combate, con maniquíes y trampa (fases 1-2).
+   - `scenes/test/enemy_test_arena.tscn`: arena de IA (fase 3).
 
 ## Controles
 
@@ -40,190 +49,155 @@ godot --path . -e # abre el editor
 |---|---|---|
 | Moverse | W A S D | Stick izquierdo |
 | Cámara | Mouse (con el cursor capturado) | Stick derecho |
-| Correr | Shift (mantener) | L3 (clic del stick izquierdo) |
+| Correr | Shift (mantener) | L3 |
 | Saltar | Espacio | A / Cruz |
 | Ataque ligero (combo de 3) | Clic izquierdo | RB / R1 |
 | Ataque fuerte (30 stamina) | Clic derecho | RT / R2 |
 | Esquiva (20 stamina) | Ctrl | B / Círculo |
-| Liberar el mouse | Esc | — |
-| Capturar el mouse | Clic izquierdo | — |
-| Depuración de enemigos (mostrar/ocultar) | F3 | — |
+| **Interactuar** (puertas, estatua, inscripciones, objetos) | **E** | X / Cuadrado |
+| Mostrar/ocultar la ayuda de controles | F1 | — |
+| Depuración de enemigos | F3 | — |
+| Liberar / capturar el mouse | Esc / Clic izquierdo | — |
 
-Las teclas usan *physical keycodes*: WASD queda en la misma posición física con distribuciones AZERTY/QWERTZ.
+- **Orientación:** el personaje mira hacia donde apunta la cámara. W avanza, S retrocede, A/D se desplazan de costado, y los golpes salen hacia adelante. Se puede volver al modo anterior desmarcando **Face Camera Direction** en `resources/player/default_movement_settings.tres`.
+- **Moverse atacando:** el movimiento es libre durante los golpes (`attack_move_speed_multiplier` del arma). El salto se bloquea hasta que termina el golpe.
+- **Combo:** volvé a hacer clic durante el golpe. **Esquiva:** con dirección, ruedas hacia ella; sin dirección, das un paso atrás.
 
-El salto se desactiva sin tocar código: abrí `resources/player/default_movement_settings.tres` y desmarcá **Jump Enabled**.
+## El Despertar (resumen)
 
-- **Combo:** volvé a hacer clic durante el golpe para encadenar; el tercero hace más daño.
-- **Esquiva:** con dirección, ruedas hacia ella; sin dirección, das un paso atrás.
-- **Orientación:** el personaje siempre mira hacia donde apunta la cámara. W avanza, S retrocede, A/D se desplazan de costado, y los golpes salen hacia adelante de la cámara. Para volver al modo anterior (el personaje gira hacia donde camina), desmarcá **Face Camera Direction** en `resources/player/default_movement_settings.tres`.
-- **Moverse atacando:** podés caminar y correr libremente mientras golpeás (configurable por arma con `attack_move_speed_multiplier`); el salto se bloquea hasta el final del golpe.
-- **Clic para capturar:** el clic que captura el mouse no dispara un ataque.
+| Sector | Qué hay |
+|---|---|
+| A — Cámara funeraria | Inicio junto al sarcófago, lápida legible y puerta a la cripta |
+| B — Pasillos de la cripta | Primer Soldado Corrompido e inscripción del juramento |
+| C — Sala de la Guardia | **Estatua = checkpoint** (descansar con E). Sala segura, entre dos puertas |
+| D — Catacumbas | 3 soldados. **Ruta secundaria:** saltá los escombros del pasillo este hasta la cripta oculta, con el **Medallón de la Guardia** y un altar de armas vacío |
+| E — Cámara del Guardián | Arena vacía (reservada para un futuro miniboss) |
+| F — Salida | Rampa ascendente hasta una terraza exterior con vista a la Aldea Devastada. Llegar ahí completa el nivel |
 
-### En el nivel
-
-- **Maniquíes:** frente al punto de inicio. Muestran su vida y reaparecen a los 4 s, salvo el más lejano, que queda caído.
-- **Trampa de prueba** (al sudeste, placa roja con postes): se ilumina en naranja y después daña 15 puntos cada 2,5 s. Sirve para probar la invulnerabilidad: esquivá justo cuando se pone roja.
-- **Muerte:** si tu vida llega a 0, reaparecés a los 3 s.
-
-Los ajustes del combate están en `resources/weapons/royal_guard_sword.tres` y `resources/player/default_action_settings.tres`. Ver [docs/COMBAT.md](docs/COMBAT.md).
-
-### Arena de enemigos (fase 3)
-
-La IA se prueba en una escena aparte, para no tocar el nivel principal: **`scenes/test/enemy_test_arena.tscn`**. Abrila desde el panel *Sistema de archivos* y presioná **F6** (*Ejecutar escena actual*). **F5** sigue abriendo el nivel principal.
-
-- **Al empezar:** aparecés al sur, detrás de un muro. El Soldado Corrompido patrulla un rectángulo de cuatro puntos al norte.
-- **Detección:** con la depuración (F3) ves sobre él su estado y su vida, el círculo de detección, los bordes de su campo de visión y la ruta de navegación en celeste. No te ve a través de los muros ni por la espalda, salvo que estés muy cerca.
-- **Combate:** levanta la espada (preparación), golpea y se recupera. Esquivá justo cuando baja la espada para evitar el daño con la invulnerabilidad. Tus golpes lo aturden; después de un aturdimiento tiene unos instantes de inmunidad.
-- **Perder la persecución:** corré (Shift), alejate o escondete detrás de un muro. A los 3 s sin verte vuelve a su patrulla.
-- **Plataforma baja** (noroeste): podés subir saltando, él no. Se queda en el borde mirándote.
-- **Datos del soldado:** `resources/enemies/corrupted_soldier.tres`. Ver [docs/ENEMIES.md](docs/ENEMIES.md).
+Al morir reaparecés a los 3 s en la última estatua activada, o en la tumba si no activaste ninguna. Ver [docs/LEVEL_THE_AWAKENING.md](docs/LEVEL_THE_AWAKENING.md) para el mapa y los detalles.
 
 ## Estructura
 
 ```
-project.godot                 Configuración (renderizador Compatibility, capas físicas, autoload)
+project.godot                 Configuración (Forward+, capas físicas, autoloads InputBindings y GameSession)
 export_presets.cfg            Preset de exportación Windows Desktop (más un preset Web sin uso)
 scenes/
-  main/main.tscn              Nivel de prueba: suelo, luz, paredes, rampa, escalones, pilares, túnel
-  player/player.tscn          Personaje (CharacterBody3D + cápsula + CameraRig instanciado)
+  levels/the_awakening/       El Despertar: escena del nivel, 6 sectores, entorno y vista de la aldea
+  level/                      BoxObstacle, CryptRoom (generador de salas), entorno de pruebas
+  props/                      Pilar, antorcha, casa en ruinas, brasero, restos de la Guardia, escombros
+  interaction/                Puerta, estatua-checkpoint, inscripción, altar de armas, medallón
+  player/player.tscn          Personaje (movimiento, combate, interactor, cámara)
   camera/camera_rig.tscn      Rig de cámara: Yaw → PitchPivot → SpringArm3D → Camera3D
-  level/box_obstacle.tscn     Caja estática reutilizable
-  combat/training_dummy.tscn  Maniquí de entrenamiento
-  combat/damage_pulse_trap.tscn  Trampa de prueba (daño periódico)
-  ui/hud.tscn                 HUD mínimo (controles + estado)
-  ui/combat_hud.tscn          Barras de vida/stamina y estado de acción
-  enemies/corrupted_soldier.tscn  Soldado Corrompido (primer enemigo)
-  level/test_environment.tscn Cielo + sol reutilizables para escenas de prueba
-  test/enemy_test_arena.tscn  Arena de IA: navmesh, patrulla, muros de cobertura, plataforma
+  enemies/corrupted_soldier.tscn  Soldado Corrompido
+  combat/                     Maniquí de entrenamiento y trampa de prueba
+  ui/                         HUD de ayuda (F1), HUD de combate y HUD de nivel (indicaciones + carteles)
+  main/main.tscn              Campo de pruebas de las fases 1-2
+  test/enemy_test_arena.tscn  Arena de IA de la fase 3
 scripts/
+  core/                       InputActions, InputBindings (autoload), GameSession (autoload), captura del mouse
+  player/                     PlayerController, MovementSettings, PlayerActionController
+  camera/                     ThirdPersonCamera
+  combat/                     Vida, stamina, hitbox, hurtbox, DamageInfo, WeaponData, PlayerActionSettings
+  animation/                  ActionAnimator + animaciones provisionales con Tweens
   enemies/                    EnemyData, EnemyCharacter, EnemyPerception, EnemyNavigator,
                               EnemyMeleeAttack, EnemyBrain, EnemyDebugView
-  level/runtime_navigation_region.gd  Genera el navmesh al cargar el nivel
-  combat/                     Vida, stamina, hitbox, hurtbox, DamageInfo, WeaponData, PlayerActionSettings
-  animation/                  Interfaz ActionAnimator + animaciones provisionales con Tweens
-  player/player_action_controller.gd  Máquina de estados de combate
-  level/training_dummy.gd, level/damage_pulse_trap.gd
-  ui/combat_hud.gd
-  core/input_actions.gd       Nombres de acciones como constantes (evita strings repetidos)
-  core/input_bindings.gd      Autoload: registra los bindings de teclado y gamepad por defecto
-  core/mouse_capture_controller.gd  Captura/liberación del cursor
-  player/player_controller.gd Locomoción: gravedad, aceleración, carrera, salto, giro suave
-  player/movement_settings.gd Resource con todos los parámetros ajustables
-  camera/third_person_camera.gd  Rotación de cámara (mouse y stick) con límites de pitch
-  level/box_obstacle.gd       Genera malla + colisión a partir de un único `size`
-  ui/hud.gd                   Actualiza el HUD 4 veces por segundo
-resources/
-  player/default_movement_settings.tres
-  player/default_action_settings.tres   Esquiva, aturdimiento, respawn
-  weapons/royal_guard_sword.tres        Espada de la Guardia Real
-  enemies/corrupted_soldier.tres        Estadísticas del Soldado Corrompido
-  materials/grid_ground.tres
-assets/shaders/grid_ground.gdshader  Grilla procedural del suelo (sin texturas)
-tests/combat_tests.gd         Pruebas automatizadas fases 1-2 (headless)
-tests/enemy_tests.gd          Pruebas automatizadas fase 3 (headless)
-docs/COMBAT.md                Documentación técnica del combate
-docs/ENEMIES.md               Documentación técnica de enemigos e IA
+  interaction/                Interactable, PlayerInteractor, Door, Checkpoint, Inscription, Collectible
+  levels/                     LevelController, LevelExit
+  level/                      BoxObstacle, CryptRoom, RuntimeNavigationRegion, TorchFlicker, maniquí, trampa
+  ui/                         Hud, CombatHud, LevelHud
+resources/                    Ajustes del jugador, arma, enemigo y materiales compartidos (piedra PBR)
+assets/third_party/polyhaven/  Texturas y modelos CC0 descargados (1K)
+tools/fetch_polyhaven_assets.sh  Vuelve a descargar esos recursos
+tests/                        combat_tests.gd, enemy_tests.gd, level_tests.gd (headless)
+docs/                         COMBAT.md, ENEMIES.md, LEVEL_THE_AWAKENING.md, INTERACTION.md
 ```
 
 ### Decisiones de diseño
 
-- **Jugador y cámara desacoplados.** `PlayerController` solo conoce un `Node3D` cuya orientación define "adelante" (`orientation_reference`). No sabe que es una cámara. La cámara no sabe nada del jugador.
-- **El cuerpo del jugador no rota.** Solo gira el nodo `Visual`. Así el rig de cámara puede ser hijo del jugador (hereda la posición, no la orientación) y la cápsula de colisión es estable.
-- **La cámara no atraviesa paredes** porque `SpringArm3D` lanza una esfera (radio 0,25 m) contra la capa física `world`. El jugador está en la capa `player`, así que el brazo nunca choca con su propio personaje.
-- **Parámetros en un Resource** (`MovementSettings`). Se pueden crear variantes (por ejemplo, para otros personajes) sin tocar código.
-- **Bindings en código, no en `project.godot`.** Son legibles, fáciles de comparar en el control de versiones y van a servir de base para un menú de reasignación. Si una acción ya está definida en *Project Settings → Input Map*, el autoload la respeta y no la pisa.
-- **`BoxObstacle`** (`@tool`) mantiene sincronizadas la malla y la colisión. Sus nodos hijos son internos: no se guardan en la escena ni se duplican al copiar el nodo.
-
-- **Combate por composición:** los componentes de vida, stamina, hitbox y hurtbox son nodos independientes, reutilizables por enemigos y jefes. El combate controla al jugador solo mediante una API pequeña de `PlayerController` (bloquear input y forzar la velocidad horizontal), sin reescribir la locomoción.
-- **IA separada en piezas:** el enemigo tiene datos (`EnemyData`), cuerpo, percepción, navegación, ataque y cerebro como nodos distintos. El cerebro decide y los demás ejecutan. El enemigo reutiliza el mismo sistema de daño que el jugador, así que la esquiva lo evita sin código extra. Encuentra al jugador por el grupo `player`, sin rutas de escena rígidas.
+- **Jugador y cámara desacoplados.** `PlayerController` solo conoce el `Node3D` que define "adelante". El cuerpo nunca rota; solo gira el nodo `Visual`.
+- **La cámara no atraviesa paredes:** el `SpringArm3D` colisiona contra la capa `world`.
+- **Parámetros en archivos de datos:** movimiento, arma, acciones y enemigo se ajustan sin tocar código.
+- **Combate por composición:** vida, stamina, hitbox y hurtbox son nodos reutilizados por el jugador, los enemigos y la trampa. El combate controla al jugador solo mediante una API pequeña de `PlayerController`.
+- **IA separada en piezas:** datos, cuerpo, percepción, navegación, ataque y cerebro. El enemigo usa el mismo sistema de daño, así que la esquiva lo evita sin código extra.
+- **Interacción con un único contrato:** `Interactable`, más un `PlayerInteractor` en el jugador. Puertas, estatua, inscripciones y coleccionable solo reaccionan a la señal `interacted`.
+- **Eventos de nivel por `GameSession`:** los objetos anuncian lo que pasa y la interfaz escucha. Ningún objeto del juego conoce al HUD.
+- **Geometría generada y reemplazable:** las salas son `CryptRoom` (tamaño + aberturas). Se pueden cambiar por modelos sin tocar la lógica.
 
 ### Capas físicas
 
 | Capa | Nombre | Uso |
 |---|---|---|
-| 1 | `world` | Escenario estático; la máscara del SpringArm3D |
+| 1 | `world` | Escenario estático y hojas de puertas; la máscara del SpringArm3D y del navmesh |
 | 2 | `player` | Cápsula del jugador |
 | 3 | `player_hurtbox` | Zona dañable del jugador |
 | 4 | `enemy_hurtbox` | Zona dañable de maniquíes y enemigos |
-| 5 | `enemy` | Cuerpo físico de los enemigos (el jugador choca con ellos) |
+| 5 | `enemy` | Cuerpo físico de los enemigos |
+| 6 | `interactable` | Áreas de interacción (`Interactable`) |
 
 ## Renderizado
 
-El renderizador actual es **Compatibility** (OpenGL 3.3), que se eligió cuando la web era un objetivo. Funciona bien en escritorio y en hardware modesto. Ahora que el objetivo es solo escritorio, se puede pasar a **Forward+** (Vulkan/D3D12) cuando se quieran gráficos más avanzados, como SSAO, glow, niebla volumétrica o muchas luces. Es un cambio de configuración, pero conviene hacerlo en una fase dedicada a lo visual.
+**Forward+** (Vulkan/D3D12) desde la fase 4. El Despertar usa:
+- niebla volumétrica tenue y niebla de distancia,
+- SSAO, glow y tonemapping AgX,
+- antorchas sin sombras con parpadeo por Tween,
+- una única luz puntual con sombras (la estatua),
+- luna direccional para el exterior.
 
-## Exportación para Windows (verificada)
+Las escenas de prueba siguen funcionando con este renderizador.
 
-1. Instalá la plantilla **Windows x86_64**: *Editor → Administrar Plantillas de Exportación* → *Conectarse* → elegí un mirror → marcá *Windows x86_64* → instalar.
-2. *Proyecto → Exportar…* → preset **Windows Desktop** (ya incluido, con PCK embebido) → **Exportar Proyecto** → `build/windows/BrokenCrown.exe`.
-3. Ejecutá `BrokenCrown.exe`. Si exportaste con depuración, también se genera `BrokenCrown.console.exe`, que abre una consola con los errores.
+Si alguna vez hiciera falta volver a **Compatibility** para hardware viejo: *Proyecto → Configuración del Proyecto → Renderizado → Renderer*. La niebla volumétrica no existe en ese modo.
 
-Windows SmartScreen puede advertir porque el ejecutable no está firmado ("Más información → Ejecutar de todas formas").
+## Exportación para Windows (verificada en fase 1)
+
+1. Instalá la plantilla **Windows x86_64**: *Editor → Administrar Plantillas de Exportación*.
+2. *Proyecto → Exportar…* → preset **Windows Desktop** → **Exportar Proyecto** → `build/windows/BrokenCrown.exe`.
+3. Ejecutá `BrokenCrown.exe`, o `BrokenCrown.console.exe` si exportaste con depuración.
 
 ## Pruebas automatizadas
 
 ```bash
 godot --headless --path . --script res://tests/combat_tests.gd   # fases 1-2: 48 comprobaciones
-godot --headless --path . --script res://tests/enemy_tests.gd    # fase 3: 52 comprobaciones
+godot --headless --path . --script res://tests/enemy_tests.gd    # fase 3:   53 comprobaciones
+godot --headless --path . --script res://tests/level_tests.gd    # fase 4:   88 comprobaciones (incluye recursos)
 ```
 
-Las dos suites cargan las escenas reales: el nivel principal y la arena de enemigos. El código de salida es la cantidad de fallas. La suite de enemigos tarda alrededor de un minuto porque espera recorridos de patrulla reales.
+Cada suite carga escenas reales y devuelve como código de salida la cantidad de fallas. Las suites de enemigos y del nivel tardan entre uno y dos minutos porque esperan recorridos reales.
 
-## Checklist de la fase 3 (manual, en la arena con F6)
+**Lo que las pruebas no cubren:** el aspecto visual (iluminación, niebla, legibilidad) y la sensación de juego. Eso requiere probar jugando.
 
-- [ ] El Soldado Corrompido aparece y patrulla entre los cuatro puntos, esperando en cada uno.
-- [ ] Te detecta si entrás en su campo de visión (el texto dice "VE AL JUGADOR" y pasa a `Chase`).
-- [ ] No te detecta detrás del muro central ni por la espalda (salvo muy cerca).
-- [ ] Te persigue rodeando los muros (la línea celeste muestra la ruta).
-- [ ] No atraviesa muros ni obstáculos.
-- [ ] Si te escondés o te alejás corriendo, deja de perseguirte (`Return`) y vuelve a su patrulla.
-- [ ] A distancia corta levanta la espada y ataca, y tu barra de vida baja.
-- [ ] Si esquivás justo cuando baja la espada, aparece "Golpe evitado (invulnerable)".
-- [ ] Tus ataques le bajan la vida (la ves en su etiqueta) y lo aturden.
-- [ ] Al llegar a 0 cae, deja de atacar y a los 6 s desaparece.
-- [ ] El nivel principal (F5) sigue funcionando como en las fases 1 y 2.
+## Checklist de la fase 4 (manual, F5)
+
+- [ ] El nivel carga sin errores y aparecés junto al sarcófago, en la cámara funeraria.
+- [ ] La lápida se lee con E. La puerta de la cámara se abre con E y no se puede atravesar cerrada.
+- [ ] La cámara se comporta bien en los pasillos (se acorta contra las paredes).
+- [ ] El primer soldado patrulla el salón B2, te detecta y te persigue (también a través de una puerta abierta).
+- [ ] El combate funciona igual que en las fases 2 y 3.
+- [ ] La Sala de la Guardia es segura (dos puertas). La estatua muestra "[E] Descansar".
+- [ ] Descansar recupera vida y stamina, muestra "Punto de descanso" y la estatua se ilumina en dorado.
+- [ ] Al morir reaparecés frente a la estatua, mirando hacia la sala, y todo funciona.
+- [ ] En las catacumbas hay 3 soldados (uno hace guardia sin moverse).
+- [ ] La ruta secundaria (pasillo este del osario) se pasa saltando los escombros. Ahí están el medallón (E para recogerlo) y el altar de armas.
+- [ ] La Cámara del Guardián está vacía, con antorchas rojas.
+- [ ] La rampa lleva a la terraza. Al llegar aparece el mensaje final y se ve la aldea a lo lejos.
+- [ ] No podés caerte de la terraza.
+- [ ] La iluminación es tenue pero permite navegar y combatir (ajustable, ver limitaciones).
 - [ ] No aparecen errores en el panel Salida/Depurador.
 
-## Checklist de la fase 2 (manual)
-
-- [ ] El personaje sigue moviéndose correctamente (fase 1 intacta).
-- [ ] El clic izquierdo ejecuta ataques ligeros y el combo llega al tercer golpe (el HUD muestra `Ataque ligero 3/3`).
-- [ ] El clic derecho ejecuta un ataque fuerte y la barra verde baja.
-- [ ] Sin stamina suficiente, el ataque fuerte no sale y aparece "Stamina insuficiente".
-- [ ] La stamina se regenera unos instantes después de gastarla.
-- [ ] Ctrl ejecuta una esquiva que gasta stamina y no atraviesa paredes.
-- [ ] Esquivando sobre la trampa justo en el pulso, aparece "Golpe evitado (invulnerable)".
-- [ ] El maniquí muestra el daño, reacciona, cae al llegar a 0 y reaparece.
-- [ ] Las barras de vida y stamina se actualizan.
-- [ ] No aparecen errores en el panel Salida/Depurador.
-
-## Checklist de aceptación de la fase 1 (en el editor)
-
-- [ ] F5 inicia sin errores en el panel *Output* / *Debugger*.
-- [ ] W/A/S/D mueven al personaje relativo a la cámara.
-- [ ] El mouse gira la cámara. El pitch está limitado (no da la vuelta).
-- [ ] Shift aumenta la velocidad (el HUD muestra `Corriendo: si`).
-- [ ] Espacio salta. Los escalones al oeste (`JumpSteps`) requieren saltar.
-- [ ] Al soltar las teclas, el personaje desacelera en lugar de frenar en seco.
-- [ ] El personaje mira hacia donde apunta la cámara: S camina hacia atrás y A/D se desplazan de costado sin darse vuelta.
-- [ ] Choca y se desliza contra paredes, pilares, cajas y el muro en ángulo.
-- [ ] Sube la rampa (al este) hasta la plataforma.
-- [ ] Al acercar la cámara a un pilar o entrar al túnel (sudoeste), la cámara se acorta y no atraviesa la geometría.
-- [ ] Esc libera el cursor y un clic lo recaptura.
-- [ ] Con un gamepad conectado, los sticks mueven al personaje y la cámara.
+Los checklists de las fases 1 a 3 siguen siendo válidos en sus escenas: `main.tscn` y `enemy_test_arena.tscn`.
 
 ## Limitaciones conocidas
 
-- **Validación:** la fase 1 se probó en Godot 4.7.2, tanto en el editor como en el build de Windows (AMD Radeon RX 6600, Compatibility). La fase 2 fue verificada jugando. La fase 3 pasa sus 52 pruebas automatizadas headless, pero falta probarla jugando.
-- **Micro-stutter en monitores de más de 60 Hz:** el personaje se mueve en `_physics_process` (60 Hz) y no está activada la interpolación física. Esto se va a resolver en una fase posterior, cuando se defina el sistema de cámara definitivo.
-- **Sin escalones automáticos:** `CharacterBody3D` no sube escalones por sí solo. Los desniveles de más de unos 10 cm requieren saltar (es intencional en el nivel de prueba).
-- **Gamepad:** el mapeo usa la convención SDL (A = botón inferior). Los mandos no reconocidos pueden tener los ejes cambiados.
-- **Proyecto dentro de OneDrive:** la sincronización puede bloquear archivos de `.godot/` durante la importación y provocar errores intermitentes. Se recomienda pausar OneDrive mientras trabajás, o mover el proyecto fuera de la carpeta sincronizada.
-- **Animaciones provisionales:** son Tweens sobre primitivas. Los tiempos de golpe e invulnerabilidad dependen de los datos y no de la animación, así que lo visual puede no coincidir perfectamente con la ventana real de impacto.
-- **Hitbox rectangular:** el golpe usa una caja frente al personaje durante la ventana activa, no sigue el arco de la espada.
-- **Ataques solo en el suelo:** no hay ataques ni esquivas en el aire.
-- **Trampa de prueba:** existe solo para probar daño e invulnerabilidad; no es contenido final.
-- **Un solo enemigo y sin evasión entre agentes:** la evasión de `NavigationAgent3D` está desactivada. Varios enemigos se empujan físicamente, pero no se esquivan con inteligencia. Conviene activarla cuando haya grupos de enemigos.
-- **El enemigo no reaparece:** el cuerpo desaparece a los 6 s. Las reapariciones (por ejemplo, al descansar) quedan para una fase posterior.
-- **Navmesh generado al cargar:** es ideal para la arena de prueba. En niveles grandes conviene generarlo en el editor y desactivar `bake_on_ready`.
-- **El enemigo no salta ni trepa:** se queda en el borde de cualquier desnivel de más de 25 cm.
-- **El nivel principal no tiene enemigos:** viven en la arena de prueba, porque el nivel principal no tiene región de navegación.
+- **Validación visual pendiente (fase 4):** las 189 pruebas automáticas pasan, pero el aspecto visual con Forward+ y los materiales PBR (niebla, brillo, legibilidad de la oscuridad, escala de las texturas) no se pudo verificar desde la terminal. Los valores de iluminación están en `scenes/levels/the_awakening/awakening_environment.tscn` y en `scenes/props/wall_torch.tscn`, y la escala de las texturas en el `uv1_scale` de `resources/materials/crypt_*.tres`.
+- **Checkpoint solo de sesión:** no hay guardado en disco. Al cerrar el juego se pierde.
+- **Los enemigos no reaparecen al descansar** (comportamiento soulslike pendiente). Los muertos desaparecen a los 6 s.
+- **Las puertas no se cierran** una vez abiertas, y la cerradura (`locked`) existe pero no hay llaves todavía.
+- **Coleccionable sin inventario:** solo queda registrado en la sesión.
+- **Navmesh generado al cargar:** tarda una fracción de segundo en este nivel. Para niveles mucho más grandes conviene generarlo en el editor y desactivar `bake_on_ready`.
+- **Sin evasión entre enemigos:** varios soldados se empujan físicamente pero no se esquivan con inteligencia.
+- **El enemigo no salta ni trepa:** por eso no entra a la ruta secundaria ni sube a la terraza.
+- **Micro-stutter en monitores de más de 60 Hz:** no está activada la interpolación física.
+- **Animaciones provisionales:** Tweens sobre primitivas. El hitbox es rectangular y no sigue el arco de la espada.
+- **Proyecto dentro de OneDrive:** la sincronización puede bloquear archivos de `.godot/` durante la importación.
+- **Gamepad:** mapeo SDL. Los mandos no reconocidos pueden tener los ejes cambiados.
+- **Puertas con jambas:** el modelo de puerta mide 2 m de ancho. Para no deformarlo, cada puerta agrega jambas de piedra y el vano queda en 2 m cuando hay puerta.
+- **Peso del repositorio:** los recursos 1K suman unos 34 MB. Si crecen mucho, conviene usar Git LFS.

@@ -1,0 +1,119 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/crypt_room.tscn" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="2_box"]
+[ext_resource type="Material" path="res://resources/materials/crypt_wall.tres" id="3_wall"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/inscription_tablet.tscn" id="d_tablet"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/wall_torch.tscn" id="p_torch"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/guard_remains.tscn" id="a_remains"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/rubble_pile.tscn" id="a_rubble"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/brazier.tscn" id="a_brazier"]
+
+[node name="SectorE_GuardianChamber" type="Node3D"]
+
+[node name="CorridorE0" parent="." instance=ExtResource("1_room")]
+position = Vector3(17, 0, -68)
+inner_size = Vector2(3, 4)
+openings = Array[Vector3]([Vector3(0, 0, 3), Vector3(1, 0, 3)])
+
+[node name="Arena" parent="." instance=ExtResource("1_room")]
+position = Vector3(17, 0, -82)
+inner_size = Vector2(22, 22)
+height = 7.0
+openings = Array[Vector3]([Vector3(1, 0, 3), Vector3(0, 0, 3)])
+
+[node name="PillarSW" parent="." instance=ExtResource("2_box")]
+position = Vector3(10.5, 3.5, -75.5)
+size = Vector3(1.6, 7, 1.6)
+surface_material = ExtResource("3_wall")
+
+[node name="PillarSE" parent="." instance=ExtResource("2_box")]
+position = Vector3(23.5, 3.5, -75.5)
+size = Vector3(1.6, 7, 1.6)
+surface_material = ExtResource("3_wall")
+
+[node name="PillarNW" parent="." instance=ExtResource("2_box")]
+position = Vector3(10.5, 3.5, -88.5)
+size = Vector3(1.6, 7, 1.6)
+surface_material = ExtResource("3_wall")
+
+[node name="PillarNE" parent="." instance=ExtResource("2_box")]
+position = Vector3(23.5, 3.5, -88.5)
+size = Vector3(1.6, 7, 1.6)
+surface_material = ExtResource("3_wall")
+
+[node name="CoverWest" parent="." instance=ExtResource("2_box")]
+position = Vector3(12, 0.75, -82)
+size = Vector3(1, 1.5, 3)
+surface_material = ExtResource("3_wall")
+
+[node name="CoverEast" parent="." instance=ExtResource("2_box")]
+position = Vector3(22, 0.75, -82)
+size = Vector3(1, 1.5, 3)
+surface_material = ExtResource("3_wall")
+
+[node name="MinibossSpawn" type="Marker3D" parent="."]
+position = Vector3(17, 0, -86)
+
+[node name="GuardianInscription" parent="." instance=ExtResource("d_tablet")]
+position = Vector3(14, 0, -71.35)
+rotation = Vector3(0, 3.14159, 0)
+title = "Cámara del Guardián"
+text = "Algo antiguo custodiaba esta salida. Su lugar está vacío... por ahora."
+
+[node name="TorchArenaSW" parent="." instance=ExtResource("p_torch")]
+position = Vector3(6, 0, -77)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="Light" parent="TorchArenaSW"]
+light_color = Color(1, 0.3, 0.18, 1)
+light_energy = 2.2
+
+[node name="TorchArenaNW" parent="." instance=ExtResource("p_torch")]
+position = Vector3(6, 0, -87)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="Light" parent="TorchArenaNW"]
+light_color = Color(1, 0.3, 0.18, 1)
+light_energy = 2.2
+
+[node name="TorchArenaSE" parent="." instance=ExtResource("p_torch")]
+position = Vector3(28, 0, -77)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="Light" parent="TorchArenaSE"]
+light_color = Color(1, 0.3, 0.18, 1)
+light_energy = 2.2
+
+[node name="TorchArenaNE" parent="." instance=ExtResource("p_torch")]
+position = Vector3(28, 0, -87)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="Light" parent="TorchArenaNE"]
+light_color = Color(1, 0.3, 0.18, 1)
+light_energy = 2.2
+
+[node name="BrazierWest" parent="." instance=ExtResource("a_brazier")]
+position = Vector3(14, 0, -84.5)
+rotation = Vector3(0, 0, 0)
+
+[node name="BrazierEast" parent="." instance=ExtResource("a_brazier")]
+position = Vector3(20, 0, -84.5)
+rotation = Vector3(0, 0, 0)
+
+[node name="GuardianRemainsNW" parent="." instance=ExtResource("a_remains")]
+position = Vector3(7.2, 0, -91.6)
+rotation = Vector3(0, 0.7, 0)
+
+[node name="GuardianRemainsSE" parent="." instance=ExtResource("a_remains")]
+position = Vector3(26.6, 0, -72.6)
+rotation = Vector3(0, -2.4, 0)
+
+[node name="CollapsedCorner" parent="." instance=ExtResource("a_rubble")]
+position = Vector3(26.2, 0, -91.2)
+rotation = Vector3(0, 2.0, 0)

@@ -22,4 +22,7 @@ const ATTACK_LIGHT: StringName = &"attack_light"
 const ATTACK_HEAVY: StringName = &"attack_heavy"
 const DODGE: StringName = &"dodge"
 
+const INTERACT: StringName = &"interact"
+
 const TOGGLE_ENEMY_DEBUG: StringName = &"toggle_enemy_debug"
+const TOGGLE_HELP: StringName = &"toggle_help"

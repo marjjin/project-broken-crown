@@ -1,0 +1,163 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/props/ruined_house.tscn" id="1_house"]
+[ext_resource type="Material" path="res://resources/materials/crypt_floor.tres" id="2_ground"]
+[ext_resource type="Material" path="res://resources/materials/ruin_plaster.tres" id="3_plaster"]
+[ext_resource type="Material" path="res://resources/materials/burnt_roof.tres" id="4_roof"]
+[ext_resource type="Material" path="res://resources/materials/flame.tres" id="5_flame"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_hill"]
+material = ExtResource("2_ground")
+size = Vector3(90, 14, 50)
+
+[sub_resource type="BoxMesh" id="BoxMesh_valley"]
+material = ExtResource("2_ground")
+size = Vector3(320, 1, 260)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tower"]
+material = ExtResource("3_plaster")
+size = Vector3(5, 18, 5)
+
+[sub_resource type="PrismMesh" id="PrismMesh_spire"]
+material = ExtResource("4_roof")
+size = Vector3(5.6, 6, 5.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ridge"]
+material = ExtResource("4_roof")
+size = Vector3(140, 30, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_embers"]
+material = ExtResource("5_flame")
+size = Vector3(1.2, 0.3, 1.2)
+
+[node name="DevastatedVillageVista" type="Node3D"]
+
+[node name="Hillside" type="MeshInstance3D" parent="."]
+position = Vector3(17, -7, -133)
+mesh = SubResource("BoxMesh_hill")
+
+[node name="Valley" type="MeshInstance3D" parent="."]
+position = Vector3(17, -12.5, -270)
+mesh = SubResource("BoxMesh_valley")
+
+[node name="ChurchTower" type="MeshInstance3D" parent="."]
+position = Vector3(30, -3, -215)
+mesh = SubResource("BoxMesh_tower")
+
+[node name="Spire" type="MeshInstance3D" parent="ChurchTower"]
+position = Vector3(0, 12, 0)
+rotation = Vector3(0, 0, 0.12)
+mesh = SubResource("PrismMesh_spire")
+
+[node name="FarRidge" type="MeshInstance3D" parent="."]
+position = Vector3(17, 0, -330)
+mesh = SubResource("BoxMesh_ridge")
+
+[node name="Houses" type="Node3D" parent="."]
+
+[node name="House1" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(-20, -12, -175)
+rotation = Vector3(0, 0.3, 0)
+
+[node name="House2" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(-8, -12, -182)
+rotation = Vector3(0, -0.2, 0)
+
+[node name="Roof" parent="Houses/House2"]
+visible = false
+
+[node name="House3" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(5, -12, -178)
+rotation = Vector3(0, 0.1, 0)
+
+[node name="House4" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(18, -12, -186)
+rotation = Vector3(0, 0.5, 0)
+
+[node name="House5" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(34, -12, -180)
+rotation = Vector3(0, -0.4, 0)
+
+[node name="Roof" parent="Houses/House5"]
+visible = false
+
+[node name="House6" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(46, -12, -192)
+rotation = Vector3(0, 0.2, 0)
+
+[node name="House7" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(-28, -12, -198)
+rotation = Vector3(0, 0.8, 0)
+
+[node name="House8" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(-12, -12, -205)
+rotation = Vector3(0, 0.0, 0)
+
+[node name="Roof" parent="Houses/House8"]
+visible = false
+
+[node name="House9" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(4, -12, -200)
+rotation = Vector3(0, -0.6, 0)
+
+[node name="House10" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(20, -12, -210)
+rotation = Vector3(0, 0.3, 0)
+
+[node name="Roof" parent="Houses/House10"]
+visible = false
+
+[node name="House11" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(42, -12, -208)
+rotation = Vector3(0, -0.1, 0)
+
+[node name="House12" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(-4, -12, -222)
+rotation = Vector3(0, 0.4, 0)
+
+[node name="House13" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(14, -12, -228)
+rotation = Vector3(0, -0.3, 0)
+
+[node name="Roof" parent="Houses/House13"]
+visible = false
+
+[node name="House14" parent="Houses" instance=ExtResource("1_house")]
+position = Vector3(52, -12, -224)
+rotation = Vector3(0, 0.6, 0)
+
+[node name="Fire15" type="Node3D" parent="."]
+position = Vector3(8, -11.6, -184)
+
+[node name="Embers" type="MeshInstance3D" parent="Fire15"]
+mesh = SubResource("BoxMesh_embers")
+
+[node name="Glow" type="OmniLight3D" parent="Fire15"]
+position = Vector3(0, 2, 0)
+light_color = Color(1, 0.45, 0.15, 1)
+light_energy = 4.0
+omni_range = 22.0
+
+[node name="Fire16" type="Node3D" parent="."]
+position = Vector3(25, -11.6, -207)
+
+[node name="Embers" type="MeshInstance3D" parent="Fire16"]
+mesh = SubResource("BoxMesh_embers")
+
+[node name="Glow" type="OmniLight3D" parent="Fire16"]
+position = Vector3(0, 2, 0)
+light_color = Color(1, 0.45, 0.15, 1)
+light_energy = 4.0
+omni_range = 22.0
+
+[node name="Fire17" type="Node3D" parent="."]
+position = Vector3(-10, -11.6, -203)
+
+[node name="Embers" type="MeshInstance3D" parent="Fire17"]
+mesh = SubResource("BoxMesh_embers")
+
+[node name="Glow" type="OmniLight3D" parent="Fire17"]
+position = Vector3(0, 2, 0)
+light_color = Color(1, 0.45, 0.15, 1)
+light_energy = 4.0
+omni_range = 22.0

@@ -1,0 +1,67 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/crypt_room.tscn" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/props/crypt_pillar.tscn" id="2_pillar"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/crypt_door.tscn" id="d_door"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/inscription_tablet.tscn" id="d_tablet"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/guard_statue.tscn" id="d_statue"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/wall_torch.tscn" id="p_torch"]
+
+[node name="SectorC_GuardHall" type="Node3D"]
+
+[node name="GuardHall" parent="." instance=ExtResource("1_room")]
+position = Vector3(0, 0, -40)
+inner_size = Vector2(14, 14)
+height = 5.0
+openings = Array[Vector3]([Vector3(1, 0, 3), Vector3(2, 0, 3)])
+
+[node name="PillarNW" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(-5, 0, -45)
+
+[node name="PillarNE" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(5, 0, -45)
+
+[node name="PillarSW" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(-5, 0, -35)
+
+[node name="PillarSE" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(5, 0, -35)
+
+[node name="GuardStatue" parent="." instance=ExtResource("d_statue")]
+position = Vector3(0, 0, -45)
+checkpoint_id = &"guard_hall"
+display_name = "La estatua de la Guardia Real"
+
+[node name="HallEntranceDoor" parent="." instance=ExtResource("d_door")]
+position = Vector3(0, 0, -32.5)
+
+[node name="CatacombDoor" parent="." instance=ExtResource("d_door")]
+position = Vector3(7.5, 0, -40)
+rotation = Vector3(0, 1.5708, 0)
+open_angle_degrees = -90.0
+
+[node name="HallInscription" parent="." instance=ExtResource("d_tablet")]
+position = Vector3(-6.85, 0, -40)
+rotation = Vector3(0, 1.5708, 0)
+title = "Sala de la Guardia"
+text = "Que los juramentados caídos encuentren descanso a los pies de su capitán."
+
+[node name="TorchEntranceWest" parent="." instance=ExtResource("p_torch")]
+position = Vector3(-3, 0, -33)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="Light" parent="TorchEntranceWest"]
+light_color = Color(1, 0.78, 0.55, 1)
+light_energy = 1.3
+
+[node name="TorchEntranceEast" parent="." instance=ExtResource("p_torch")]
+position = Vector3(3, 0, -33)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="Light" parent="TorchEntranceEast"]
+light_color = Color(1, 0.78, 0.55, 1)
+light_energy = 1.3

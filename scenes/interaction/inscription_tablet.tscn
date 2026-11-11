@@ -1,0 +1,57 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interaction/inscription.gd" id="1_inscription"]
+[ext_resource type="Script" path="res://scripts/interaction/interactable.gd" id="2_interactable"]
+[ext_resource type="Material" path="res://resources/materials/statue_stone.tres" id="3_stone"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_tablet"]
+material = ExtResource("3_stone")
+size = Vector3(1.2, 1.5, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_runes"]
+albedo_color = Color(0.75, 0.6, 0.3, 1)
+emission_enabled = true
+emission = Color(0.8, 0.55, 0.2, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_runes"]
+material = SubResource("StandardMaterial3D_runes")
+size = Vector3(0.8, 0.05, 0.02)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_reach"]
+size = Vector3(2, 2.2, 2.2)
+
+[node name="InscriptionTablet" type="Node3D" node_paths=PackedStringArray("interactable")]
+script = ExtResource("1_inscription")
+interactable = NodePath("Interactable")
+
+[node name="Tablet" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.4, 0)
+mesh = SubResource("BoxMesh_tablet")
+
+[node name="RuneLine1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.75, 0.08)
+mesh = SubResource("BoxMesh_runes")
+
+[node name="RuneLine2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.55, 0.08)
+mesh = SubResource("BoxMesh_runes")
+
+[node name="RuneLine3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.1, 1.35, 0.08)
+mesh = SubResource("BoxMesh_runes")
+
+[node name="RuneLine4" type="MeshInstance3D" parent="."]
+position = Vector3(0.05, 1.15, 0.08)
+mesh = SubResource("BoxMesh_runes")
+
+[node name="Interactable" type="Area3D" parent="."]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_interactable")
+prompt = "Leer"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactable"]
+position = Vector3(0, 1.1, 0.9)
+shape = SubResource("BoxShape3D_reach")

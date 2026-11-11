@@ -50,6 +50,7 @@ func _run() -> void:
 	await _test_chase_closes_distance()
 	await _test_gives_up_and_returns_to_patrol()
 	await _test_unreachable_target_does_not_lock_ai()
+	await _test_stuck_against_obstacle_skips_point()
 
 	# Stage 3: combat, damage and death.
 	_player_health = HealthComponent.find_in(_player)
@@ -244,6 +245,33 @@ func _test_unreachable_target_does_not_lock_ai() -> void:
 		frames -= 1
 	_brain.state_changed.disconnect(on_changed)
 	_check(_brain.get_state() == EnemyBrain.State.RETURN, "after losing sight it returns instead of getting stuck")
+
+
+func _test_stuck_against_obstacle_skips_point() -> void:
+	print("\n[stuck watchdog]")
+	_hide_player()
+	# A patrol point inside PillarEast (10, _, -14): off the navmesh, so the
+	# final straight approach would push into the pillar forever.
+	var route := Node3D.new()
+	var marker := Marker3D.new()
+	route.add_child(marker)
+	_arena.add_child(route)
+	marker.global_position = Vector3(10, 0, -14)
+	var original_route := _brain.patrol_route
+	await _place_soldier(Vector3(10, 0.1, -10), Vector3.FORWARD)
+	_brain.set_patrol_route(route)
+	var frames := int((_soldier.data.patrol_wait_time + 6.0) * PHYSICS_HZ)
+	var left_patrol := false
+	var was_patrolling := false
+	while frames > 0 and not left_patrol:
+		await physics_frame
+		frames -= 1
+		was_patrolling = was_patrolling or _brain.get_state() == EnemyBrain.State.PATROL
+		left_patrol = was_patrolling and _brain.get_state() == EnemyBrain.State.IDLE
+	_check(left_patrol, "a soldier pressing against a pillar gives up the point instead of getting stuck")
+	_brain.set_patrol_route(original_route)
+	route.queue_free()
+	await _place_soldier(_brain.get_patrol_points()[0], Vector3.FORWARD)
 
 
 # --- Stage 3 ------------------------------------------------------------------

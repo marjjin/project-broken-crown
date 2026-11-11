@@ -22,6 +22,16 @@ func _ready() -> void:
 	set_process(false)
 
 
+## Finds the StaminaComponent among `node`'s direct children (null if none).
+static func find_in(node: Node) -> StaminaComponent:
+	if node == null:
+		return null
+	for child in node.get_children():
+		if child is StaminaComponent:
+			return child
+	return null
+
+
 func get_current() -> float:
 	return _current
 

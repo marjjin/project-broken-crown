@@ -4,3 +4,8 @@
 # Export output (the .gdignore keeps Godot from importing it)
 build/*
 !build/.gdignore
+
+# Mixamo raw files: Adobe's terms forbid redistributing the raw character and
+# animation files, so they never go into the (possibly public) repository.
+# See docs/ASSET_LICENSES.md for how to download them again.
+assets/third_party/mixamo/raw/

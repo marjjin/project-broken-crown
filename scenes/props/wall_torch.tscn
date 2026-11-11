@@ -1,0 +1,48 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/level/torch_flicker.gd" id="1_flicker"]
+[ext_resource type="Material" path="res://resources/materials/dark_iron.tres" id="2_iron"]
+[ext_resource type="Material" path="res://resources/materials/old_wood.tres" id="3_wood"]
+[ext_resource type="Material" path="res://resources/materials/flame.tres" id="4_flame"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_bracket"]
+material = ExtResource("2_iron")
+size = Vector3(0.18, 0.3, 0.12)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_stick"]
+material = ExtResource("3_wood")
+top_radius = 0.05
+bottom_radius = 0.035
+height = 0.6
+
+[sub_resource type="SphereMesh" id="SphereMesh_flame"]
+material = ExtResource("4_flame")
+radius = 0.1
+height = 0.28
+
+[node name="WallTorch" type="Node3D"]
+
+[node name="Bracket" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2, 0.06)
+mesh = SubResource("BoxMesh_bracket")
+cast_shadow = 0
+
+[node name="Stick" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.15, 0.22)
+rotation = Vector3(0.45, 0, 0)
+mesh = SubResource("CylinderMesh_stick")
+cast_shadow = 0
+
+[node name="Flame" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.45, 0.36)
+mesh = SubResource("SphereMesh_flame")
+cast_shadow = 0
+
+[node name="Light" type="OmniLight3D" parent="."]
+position = Vector3(0, 2.5, 0.6)
+light_color = Color(1, 0.62, 0.32, 1)
+light_energy = 2.0
+light_volumetric_fog_energy = 0.6
+omni_range = 8.5
+omni_attenuation = 1.4
+script = ExtResource("1_flicker")

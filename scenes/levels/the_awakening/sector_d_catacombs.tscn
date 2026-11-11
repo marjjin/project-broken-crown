@@ -1,0 +1,198 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/crypt_room.tscn" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/props/crypt_pillar.tscn" id="2_pillar"]
+[ext_resource type="PackedScene" path="res://scenes/level/box_obstacle.tscn" id="3_box"]
+[ext_resource type="Material" path="res://resources/materials/crypt_wall.tres" id="4_wall"]
+[ext_resource type="Material" path="res://resources/materials/statue_stone.tres" id="5_stone"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/weapon_altar.tscn" id="d_altar"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/wall_torch.tscn" id="p_torch"]
+
+[ext_resource type="PackedScene" path="res://scenes/enemies/corrupted_soldier.tscn" id="e_soldier"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/guard_medallion.tscn" id="i_medallion"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/guard_remains.tscn" id="a_remains"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/rubble_pile.tscn" id="a_rubble"]
+
+[ext_resource type="PackedScene" path="res://scenes/interaction/ossuary_gate.tscn" id="a_gate"]
+
+[node name="SectorD_Catacombs" type="Node3D"]
+
+[node name="CorridorD0" parent="." instance=ExtResource("1_room")]
+position = Vector3(9.5, 0, -40)
+inner_size = Vector2(3, 3)
+openings = Array[Vector3]([Vector3(2, 0, 3), Vector3(3, 0, 3)])
+
+[node name="OssuaryD1" parent="." instance=ExtResource("1_room")]
+position = Vector3(17, 0, -40)
+inner_size = Vector2(10, 10)
+openings = Array[Vector3]([Vector3(3, 0, 3), Vector3(0, 0, 3), Vector3(2, 0, 3)])
+
+[node name="SideCorridor" parent="." instance=ExtResource("1_room")]
+position = Vector3(27, 0, -40)
+inner_size = Vector2(8, 3)
+opening_height = 2.6
+openings = Array[Vector3]([Vector3(2, 0, 3), Vector3(3, 0, 3)])
+
+[node name="CollapsedRubble" parent="." instance=ExtResource("3_box")]
+position = Vector3(26, 0.45, -40)
+size = Vector3(1, 0.9, 3)
+surface_material = ExtResource("4_wall")
+
+[node name="HiddenCryptD3" parent="." instance=ExtResource("1_room")]
+position = Vector3(36, 0, -40)
+inner_size = Vector2(8, 8)
+openings = Array[Vector3]([Vector3(3, 0, 3)])
+
+[node name="CorridorDN" parent="." instance=ExtResource("1_room")]
+position = Vector3(17, 0, -49)
+inner_size = Vector2(3, 6)
+openings = Array[Vector3]([Vector3(0, 0, 3), Vector3(1, 0, 3)])
+
+[node name="BoneHallD2" parent="." instance=ExtResource("1_room")]
+position = Vector3(17, 0, -59)
+inner_size = Vector2(14, 12)
+openings = Array[Vector3]([Vector3(1, 0, 3), Vector3(0, 0, 3), Vector3(3, 0, 3)])
+
+[node name="PillarD2NW" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(12.5, 0, -62.5)
+
+[node name="PillarD2NE" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(21.5, 0, -62.5)
+
+[node name="PillarD2SW" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(12.5, 0, -55.5)
+
+[node name="PillarD2SE" parent="." instance=ExtResource("2_pillar")]
+position = Vector3(21.5, 0, -55.5)
+
+[node name="CoffinWest" parent="." instance=ExtResource("3_box")]
+position = Vector3(11, 0.6, -63.6)
+size = Vector3(1.1, 1.2, 2.4)
+surface_material = ExtResource("5_stone")
+
+[node name="CoffinEast" parent="." instance=ExtResource("3_box")]
+position = Vector3(23, 0.6, -59)
+size = Vector3(1.1, 1.2, 2.4)
+surface_material = ExtResource("5_stone")
+
+[node name="CoffinD1" parent="." instance=ExtResource("3_box")]
+position = Vector3(18, 0.6, -40)
+rotation = Vector3(0, 1.5708, 0)
+size = Vector3(1.1, 1.2, 2.4)
+surface_material = ExtResource("5_stone")
+
+[node name="PatrolRouteD1" type="Node3D" parent="."]
+
+[node name="P1" type="Marker3D" parent="PatrolRouteD1"]
+position = Vector3(16, 0, -36.8)
+
+[node name="P2" type="Marker3D" parent="PatrolRouteD1"]
+position = Vector3(20.8, 0, -36.8)
+
+[node name="P3" type="Marker3D" parent="PatrolRouteD1"]
+position = Vector3(20.8, 0, -43.2)
+
+[node name="P4" type="Marker3D" parent="PatrolRouteD1"]
+position = Vector3(16, 0, -43.2)
+
+[node name="PatrolRouteD2" type="Node3D" parent="."]
+
+[node name="P1" type="Marker3D" parent="PatrolRouteD2"]
+position = Vector3(15, 0, -54.5)
+
+[node name="P2" type="Marker3D" parent="PatrolRouteD2"]
+position = Vector3(19, 0, -54.5)
+
+[node name="P3" type="Marker3D" parent="PatrolRouteD2"]
+position = Vector3(19, 0, -61)
+
+[node name="P4" type="Marker3D" parent="PatrolRouteD2"]
+position = Vector3(15, 0, -61)
+
+[node name="WeaponAltarSpot" type="Marker3D" parent="."]
+position = Vector3(39, 0, -40)
+
+[node name="CollectibleSpot" type="Marker3D" parent="."]
+position = Vector3(36, 0, -42.8)
+
+[node name="WeaponAltar" parent="." instance=ExtResource("d_altar")]
+position = Vector3(39, 0, -40)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="TorchD1West" parent="." instance=ExtResource("p_torch")]
+position = Vector3(12, 0, -37)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="TorchD1East" parent="." instance=ExtResource("p_torch")]
+position = Vector3(22, 0, -43)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="TorchD2West" parent="." instance=ExtResource("p_torch")]
+position = Vector3(10, 0, -57)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="TorchD2East" parent="." instance=ExtResource("p_torch")]
+position = Vector3(24, 0, -61)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="TorchD2North" parent="." instance=ExtResource("p_torch")]
+position = Vector3(14.5, 0, -65)
+rotation = Vector3(0, 0, 0)
+
+[node name="TorchHiddenCrypt" parent="." instance=ExtResource("p_torch")]
+position = Vector3(32, 0, -43)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="Light" parent="TorchHiddenCrypt"]
+light_color = Color(1, 0.6, 0.35, 1)
+light_energy = 0.8
+
+[node name="SoldierOssuary" parent="." instance=ExtResource("e_soldier")]
+position = Vector3(16, 0.1, -36.8)
+
+[node name="Brain" parent="SoldierOssuary" node_paths=PackedStringArray("patrol_route")]
+patrol_route = NodePath("../../PatrolRouteD1")
+
+[node name="SoldierBoneHall" parent="." instance=ExtResource("e_soldier")]
+position = Vector3(15, 0.1, -54.5)
+
+[node name="Brain" parent="SoldierBoneHall" node_paths=PackedStringArray("patrol_route")]
+patrol_route = NodePath("../../PatrolRouteD2")
+
+[node name="SoldierBoneHallGuard" parent="." instance=ExtResource("e_soldier")]
+position = Vector3(17, 0.1, -63.5)
+
+[node name="GuardMedallion" parent="." instance=ExtResource("i_medallion")]
+position = Vector3(36, 0, -42.8)
+
+[node name="OssuaryNiche" parent="." instance=ExtResource("1_room")]
+position = Vector3(8, 0, -59)
+inner_size = Vector2(2, 3)
+openings = Array[Vector3]([Vector3(2, 0, 3)])
+
+[node name="CorruptionGlow" type="OmniLight3D" parent="."]
+position = Vector3(8, 0.8, -59)
+light_color = Color(0.6, 0.2, 0.9, 1)
+light_energy = 0.9
+omni_range = 4.0
+
+[node name="OssuaryGate" parent="." instance=ExtResource("a_gate")]
+position = Vector3(9.5, 0, -59)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="NicheBones" parent="." instance=ExtResource("a_rubble")]
+position = Vector3(7.9, 0, -59.4)
+rotation = Vector3(0, 1.1, 0)
+
+[node name="RubbleOnBarrier" parent="." instance=ExtResource("a_rubble")]
+position = Vector3(26, 0.9, -40)
+rotation = Vector3(0, 0, 0)
+
+[node name="ForgottenGuard" parent="." instance=ExtResource("a_remains")]
+position = Vector3(31.8, 0, -36.4)
+rotation = Vector3(0, -0.6, 0)

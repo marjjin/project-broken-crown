@@ -27,6 +27,12 @@ const STATE_NAMES := {
 }
 ## The enemy must face the target within this angle before starting a swing.
 const ATTACK_FACING_TOLERANCE_DEGREES := 25.0
+## Stuck watchdog: heading to a fixed destination without getting at least
+## PROGRESS_STEP closer for STUCK_TIME seconds counts as "unreachable".
+const PROGRESS_STEP := 0.1
+const STUCK_TIME := 1.0
+## A destination that moves more than this resets the watchdog (moving targets).
+const GOAL_MOVED_RESET := 1.0
 
 @export var body: EnemyCharacter
 @export var perception: EnemyPerception
@@ -50,6 +56,9 @@ var _chase_origin := Vector3.ZERO
 var _unreachable_time := 0.0
 var _stagger_immunity_left := 0.0
 var _target_health: HealthComponent
+var _progress_goal := Vector3.INF
+var _progress_best := INF
+var _progress_stall := 0.0
 
 
 func _ready() -> void:
@@ -107,6 +116,13 @@ func reset_ai() -> void:
 	_state_time = 0.0
 
 
+## Assigns a new patrol route at runtime (spawners, tests). null = no route.
+func set_patrol_route(route: Node3D) -> void:
+	patrol_route = route
+	_collect_patrol_points()
+	_patrol_index = 0
+
+
 ## Makes the next patrol leg head to `index` (wraps around the route).
 func restart_patrol(index: int = 0) -> void:
 	if not _patrol_points.is_empty():
@@ -140,6 +156,7 @@ func _change_state(new_state: State) -> void:
 	_state = new_state
 	_state_time = 0.0
 	_unreachable_time = 0.0
+	_progress_goal = Vector3.INF
 	navigator.clear_destination()
 	_on_enter_state(new_state, previous)
 	state_changed.emit(previous, new_state)
@@ -350,8 +367,25 @@ func _travel_to(point: Vector3, speed: float, delta: float) -> bool:
 		_unreachable_time += delta
 	else:
 		body.move_in_direction(direction, speed)
-		_unreachable_time = _unreachable_time + delta if not reachable else 0.0
+		var stuck := _update_stuck_watchdog(point, delta)
+		_unreachable_time = _unreachable_time + delta if (stuck or not reachable) else 0.0
 	return false
+
+
+## True while moving toward a fixed `goal` without making progress (e.g.
+## pressing against a pillar next to a point that is off the navmesh).
+func _update_stuck_watchdog(goal: Vector3, delta: float) -> bool:
+	if _progress_goal.distance_to(goal) > GOAL_MOVED_RESET:
+		_progress_goal = goal
+		_progress_best = INF
+		_progress_stall = 0.0
+	var distance := body.flat_distance_to(goal)
+	if distance < _progress_best - PROGRESS_STEP:
+		_progress_best = distance
+		_progress_stall = 0.0
+	else:
+		_progress_stall += delta
+	return _progress_stall > STUCK_TIME
 
 
 func _get_return_point() -> Vector3:

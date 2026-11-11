@@ -1,0 +1,22 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/textures/rock_wall_08/rock_wall_08_diff_1k.jpg" id="1_albedo"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/textures/rock_wall_08/rock_wall_08_nor_gl_1k.jpg" id="2_normal"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/textures/rock_wall_08/rock_wall_08_rough_1k.jpg" id="3_rough"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/textures/rock_wall_08/rock_wall_08_ao_1k.jpg" id="4_ao"]
+
+[resource]
+albedo_color = Color(0.6, 0.58, 0.56, 1)
+albedo_texture = ExtResource("1_albedo")
+roughness_texture = ExtResource("3_rough")
+normal_enabled = true
+normal_scale = 1.2
+normal_texture = ExtResource("2_normal")
+ao_enabled = true
+ao_light_affect = 0.4
+ao_texture = ExtResource("4_ao")
+uv1_scale = Vector3(0.35, 0.35, 0.35)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.0
+uv1_world_triplanar = true
+texture_filter = 5

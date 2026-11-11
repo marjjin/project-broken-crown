@@ -25,6 +25,13 @@ const MIN_SIZE := 0.05
 		surface_material = value
 		_apply_material()
 
+## false = collision only (invisible walls that keep the player in bounds).
+@export var mesh_visible: bool = true:
+	set(value):
+		mesh_visible = value
+		if _mesh_instance != null:
+			_mesh_instance.visible = value
+
 var _mesh: BoxMesh
 var _shape: BoxShape3D
 var _mesh_instance: MeshInstance3D
@@ -37,6 +44,7 @@ func _ready() -> void:
 
 	_mesh_instance = MeshInstance3D.new()
 	_mesh_instance.mesh = _mesh
+	_mesh_instance.visible = mesh_visible
 	add_child(_mesh_instance, false, Node.INTERNAL_MODE_FRONT)
 
 	var collision := CollisionShape3D.new()
